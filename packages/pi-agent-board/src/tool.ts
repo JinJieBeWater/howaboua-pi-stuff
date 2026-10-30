@@ -7,7 +7,8 @@ export function createBoardTool(board: BoardRuntime) {
 	return defineTool({
 		name: "board",
 		label: "Message board",
-		description: "Shared discussions and saved board history",
+		description:
+			"Shared discussions and saved history; reply: action=post + thread_id",
 		parameters: BoardParameters,
 		executionMode: "sequential",
 		async execute(id, params, signal, _onUpdate, ctx) {
