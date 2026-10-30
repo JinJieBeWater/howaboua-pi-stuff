@@ -164,7 +164,7 @@ export function queryArguments(
 	for (const field of Object.keys(params))
 		if (field !== "action" && !fields.includes(field))
 			throw new Error(
-				`${namespace} ${String(publicAction)} does not accept ${field}; use {} for help`,
+				`${namespace} ${String(publicAction)} does not accept ${field}; supported fields: ${fields.map((name) => publicField(namespace, name)).join(", ")}; use {} for help`,
 			);
 	if (
 		["read_file", "write_file", "append_to_file"].includes(String(action)) &&
