@@ -210,6 +210,7 @@ function createNestedTools(
 			createViewImageTool({
 				customRustBinariesDir: runtime.state.config.tools.customRustBinariesDir,
 				describeForTextModels: runtime.state.config.tools.viewImageFallback,
+				inlineImages: true,
 				promptSnippet: false,
 				customRendering: runtime.state.config.ui.toolRenaming,
 			}),

@@ -22,9 +22,9 @@ export function renderTextWithImages(
 	if (!images.length) return new Text(text, options.paddingX ?? 0, 0);
 
 	const box = new Container();
-	box.addChild(new Text(text, options.paddingX ?? 0, 0));
-	for (const image of images) {
-		box.addChild(new Spacer(1));
+	if (text) box.addChild(new Text(text, options.paddingX ?? 0, 0));
+	for (const [index, image] of images.entries()) {
+		if (text || index > 0) box.addChild(new Spacer(1));
 		box.addChild(new Image(image.data, image.mimeType, { fallbackColor: (value) => theme.fg("dim", value) }, { maxWidthCells: 60 }));
 	}
 	return box;

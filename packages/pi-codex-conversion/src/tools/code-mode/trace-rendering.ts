@@ -78,7 +78,9 @@ function renderTrace(
 		? renderStore.get(trace.id)
 		: { state: {} };
 	const rendererInput = renderState.input ?? trace.input;
-	const rendererResult = renderState.result ?? renderedTrace.result;
+	const rendererResult = renderState.result
+		? withoutEmittedImages({ ...trace, result: renderState.result }, emittedImages).result
+		: renderedTrace.result;
 	const partial = trace.status === "running" || trace.status === "blocked";
 	const renderContext: CodeModeNestedRenderContext = {
 		toolCallId: trace.id,
