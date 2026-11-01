@@ -10,6 +10,7 @@
 		"directory": "packages/pi-notes-compaction"
 	},
 	"files": [
+		"dist",
 		"src",
 		"README.md",
 		"PCC-INTEGRATION.md",
@@ -25,11 +26,14 @@
 	"pi": {
 		"extensions": [
 			"./changelog.ts",
-			"./src/index.ts"
+			"./dist/index.js"
 		]
 	},
-	"main": "src/index.ts",
+	"main": "./dist/index.js",
+	"types": "./src/index.ts",
 	"scripts": {
+		"build": "bun ../../scripts/build-startup-bundle.mjs pi-notes-compaction",
+		"prepack": "bun run check && bun run build",
 		"check": "bun run lint && bun run typecheck",
 		"lint": "biome check .",
 		"format": "biome check --write .",
@@ -56,7 +60,15 @@
 		}
 	},
 	"exports": {
-		".": "./src/index.ts",
-		"./context-sharing": "./src/context-sharing.ts"
+		".": {
+			"types": "./src/index.ts",
+			"import": "./dist/index.js",
+			"default": "./dist/index.js"
+		},
+		"./context-sharing": {
+			"types": "./src/context-sharing.ts",
+			"import": "./dist/context-sharing.js",
+			"default": "./dist/context-sharing.js"
+		}
 	}
 }
