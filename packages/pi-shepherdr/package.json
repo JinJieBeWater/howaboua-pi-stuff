@@ -24,6 +24,7 @@
 		"orchestration"
 	],
 	"files": [
+		"dist",
 		"index.ts",
 		"src",
 		"profiles",
@@ -35,8 +36,9 @@
 		"CHANGELOG.md"
 	],
 	"scripts": {
+		"build": "bun ../../scripts/build-startup-bundle.mjs pi-shepherdr",
 		"check": "bun run lint && bun run typecheck",
-		"prepack": "bun run check",
+		"prepack": "bun run check && bun run build",
 		"typecheck": "tsgo --noEmit",
 		"lint": "biome check .",
 		"format": "biome check --write .",
@@ -74,14 +76,21 @@
 	},
 	"pi": {
 		"extensions": [
-			"./index.ts"
+			"./dist/index.js"
 		]
 	},
 	"engines": {
 		"node": ">=22.18.0"
 	},
-	"main": "index.ts",
-	"exports": "./index.ts",
+	"main": "./dist/index.js",
+	"types": "./index.ts",
+	"exports": {
+		".": {
+			"types": "./index.ts",
+			"import": "./dist/index.js",
+			"default": "./dist/index.js"
+		}
+	},
 	"publishConfig": {
 		"access": "public"
 	}
