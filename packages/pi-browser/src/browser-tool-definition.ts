@@ -29,7 +29,7 @@ export function createBrowserTool(
 		defineTool,
 		Type,
 	}: { defineTool: typeof definePiTool; Type: typeof SchemaType },
-	runtime: BrowserRuntime,
+	runtime: Pick<BrowserRuntime, "hosts" | "execute">,
 	isGpt = () => false,
 ) {
 	return defineTool({

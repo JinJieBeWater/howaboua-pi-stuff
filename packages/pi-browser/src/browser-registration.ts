@@ -1,7 +1,8 @@
 import type { defineTool, ExtensionAPI } from "@earendil-works/pi-coding-agent";
 import type { Type } from "typebox";
+import { browserHelp } from "./browser/help.js";
 import { BrowserRoutes, loadBrowserRoutes } from "./browser/routes.js";
-import { BrowserRuntime } from "./browser/runtime.js";
+import type { BrowserRuntime } from "./browser/runtime.js";
 import { registerBrowserCommand } from "./browser/settings.js";
 import {
 	createBrowserTool,
@@ -23,7 +24,23 @@ export default async function browserExtension(
 		routes = new BrowserRoutes();
 		configError = error instanceof Error ? error.message : String(error);
 	}
-	const runtime = new BrowserRuntime(routes);
+	let runtimePromise: Promise<BrowserRuntime> | undefined;
+	const lifetime = new AbortController();
+	const runtime: Pick<BrowserRuntime, "hosts" | "execute"> = {
+		hosts: routes.names,
+		async execute(request, options = {}) {
+			const signal = options.signal
+				? AbortSignal.any([options.signal, lifetime.signal])
+				: lifetime.signal;
+			signal.throwIfAborted();
+			if ("help" in request) return browserHelp(routes.names);
+			const backend = await (runtimePromise ??= import(
+				"./browser/runtime.js"
+			).then(({ BrowserRuntime }) => new BrowserRuntime(routes)));
+			signal.throwIfAborted();
+			return backend.execute(request, options);
+		},
+	};
 	let gpt = false;
 	const tool = createBrowserTool(sdk, runtime, () => gpt);
 	registerBrowserCommand(pi);
@@ -52,8 +69,10 @@ export default async function browserExtension(
 
 	const registration = await registerBrowserInCodeMode(pi, tool, sdk);
 	pi.on("session_shutdown", async () => {
+		lifetime.abort(new Error("Browser runtime closed"));
 		registration?.unregister();
-		await runtime.close();
+		const backend = await runtimePromise;
+		await backend?.close();
 	});
 	if (configError) {
 		pi.on("session_start", (_event, ctx) => {
