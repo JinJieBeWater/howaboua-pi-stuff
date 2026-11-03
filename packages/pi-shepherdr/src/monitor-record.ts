@@ -116,6 +116,7 @@ export function parseMonitoredAgent(
 				: false;
 	const name = optionalString(record, "name");
 	const instructions = optionalString(record, "instructions");
+	const latestInstruction = optionalString(record, "latestInstruction");
 	const activity = parsedActivity(record["activity"]);
 	if (
 		cwd === false ||
@@ -123,6 +124,7 @@ export function parseMonitoredAgent(
 		notifiedExtensionMessages === false ||
 		name === false ||
 		instructions === false ||
+		latestInstruction === false ||
 		!activity
 	) {
 		return undefined;
@@ -130,6 +132,7 @@ export function parseMonitoredAgent(
 	return {
 		scope: record["scope"],
 		...(instructions ? { instructions } : {}),
+		...(latestInstruction ? { latestInstruction } : {}),
 		activity,
 		paneId: record["paneId"],
 		terminalId: record["terminalId"],
@@ -166,6 +169,17 @@ export function recordForPanel(
 	};
 }
 
+export function instructionFields(
+	record: MonitoredAgent | undefined,
+): Pick<MonitoredAgent, "instructions" | "latestInstruction"> {
+	return {
+		...(record?.instructions ? { instructions: record.instructions } : {}),
+		...(record?.latestInstruction
+			? { latestInstruction: record.latestInstruction }
+			: {}),
+	};
+}
+
 export function sameMonitorRecord(
 	left: MonitoredAgent,
 	right: MonitoredAgent,
@@ -173,6 +187,7 @@ export function sameMonitorRecord(
 	return (
 		left.scope === right.scope &&
 		left.instructions === right.instructions &&
+		left.latestInstruction === right.latestInstruction &&
 		left.paneId === right.paneId &&
 		left.terminalId === right.terminalId &&
 		left.workspaceId === right.workspaceId &&

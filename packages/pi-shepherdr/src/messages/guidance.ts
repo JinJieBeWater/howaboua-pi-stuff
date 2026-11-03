@@ -31,7 +31,14 @@ export function activeAgentsBriefing(
 					"unavailable",
 				...(agent.cwd ? { cwd: agent.cwd } : {}),
 				...((agent.instructions ?? activityTask(agent.activity))
-					? { instructions: agent.instructions ?? activityTask(agent.activity) }
+					? {
+							instructions: [
+								agent.instructions ?? activityTask(agent.activity),
+								agent.latestInstruction,
+							]
+								.filter(Boolean)
+								.join("\n\n"),
+						}
 					: {}),
 			})),
 		),

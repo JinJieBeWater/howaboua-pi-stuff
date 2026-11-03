@@ -6,6 +6,7 @@ import {
 	sameAgentActivity,
 } from "./activity.js";
 import {
+	instructionFields,
 	parseMonitoredAgent,
 	recordForPanel,
 	sameMonitorRecord,
@@ -123,9 +124,7 @@ export class MonitorState {
 			? ({ attemptId: randomUUID(), phase: "working" } as const)
 			: (existing?.activity ?? activityForPanel(panel));
 		const record = {
-			...(existing?.instructions
-				? { instructions: existing.instructions }
-				: {}),
+			...instructionFields(existing),
 			...recordForPanel(
 				panel,
 				activity,
@@ -186,10 +185,12 @@ export class MonitorState {
 		const record = this.byPane(paneId);
 		if (!record) return false;
 		const prior = record.instructions ?? activityTask(record.activity);
+		// Keep the first and latest instruction only; appending every message grew snapshots and rollover briefings without bound.
+		const { latestInstruction: _, ...rest } = record;
 		this.agents.set(record.terminalId, {
-			...record,
-			instructions:
-				prior && prior !== message ? `${prior}\n\n${message}` : message,
+			...rest,
+			instructions: prior ?? message,
+			...(prior && prior !== message ? { latestInstruction: message } : {}),
 		});
 		return true;
 	}
@@ -389,7 +390,7 @@ export class MonitorState {
 			}
 
 			const updated = {
-				...(record.instructions ? { instructions: record.instructions } : {}),
+				...instructionFields(record),
 				...recordForPanel(
 					panel,
 					activity,
