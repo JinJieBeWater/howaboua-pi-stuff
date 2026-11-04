@@ -141,6 +141,9 @@ export function parseAgentsRequest(input: unknown): AgentsParams {
 	let request = value as Record<string, unknown>;
 	if (!("action" in request) && request["commands"] === true)
 		request = { ...request, action: "help" };
+	// Some model decoders parse JSON-shaped values of undeclared fields; message is always text.
+	if (typeof request["message"] === "object" && request["message"] !== null)
+		request = { ...request, message: JSON.stringify(request["message"]) };
 	const action = request["action"];
 	if (typeof action !== "string" || !Object.hasOwn(ACTION_FIELDS, action)) {
 		throw new Error(`agents action must be one of: ${ACTIONS.join(", ")}`);

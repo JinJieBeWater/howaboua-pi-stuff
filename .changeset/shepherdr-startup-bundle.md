@@ -9,3 +9,4 @@
 - Settled `agents` calls collapse to one line, and `list` and `find` show how many agents they returned.
 - Agent event cards are shorter: long responses collapse to 16 lines, while paths and tasks move to the expanded view.
 - Blocked agent cards show the pending question without expanding.
+- Claude models can answer blocked agents with direct `agents reply` calls. JSON-shaped messages no longer fail with "message is required".
