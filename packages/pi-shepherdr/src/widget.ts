@@ -69,6 +69,7 @@ function agentSummary(
 	const machinesByName = new Map(
 		machines.map((machine) => [machine.id, machine]),
 	);
+	const blocked: string[] = [];
 	const counts = new Map<AgentStatus | "offline", number>([
 		["blocked", 0],
 		["offline", 0],
@@ -86,19 +87,25 @@ function agentSummary(
 					? "unknown"
 					: activityStatus(agent.activity);
 		counts.set(status, (counts.get(status) ?? 0) + 1);
+		if (status === "blocked") blocked.push(agent.name ?? agent.paneId);
 	}
-	const summary = [theme.fg("accent", `herdr agents ${agents.length}`)];
+	const summary = [theme.fg("accent", "agents")];
 	for (const [status, count] of counts) {
 		if (!count) continue;
 		const { icon, tone } = statusAppearance(status);
-		summary.push(theme.fg(tone, `${icon} ${count} ${status}`));
+		const label =
+			status !== "blocked"
+				? `${count} ${status}`
+				: count === 1
+					? `${blocked[0]} blocked`
+					: `${count} blocked: ${blocked.slice(0, 2).join(", ")}${count > 2 ? ` +${count - 2}` : ""}`;
+		summary.push(theme.fg(tone, `${icon} ${label}`));
 	}
-	summary.push(
-		theme.fg(
-			"dim",
-			`${machines.filter((machine) => machine.status === "connected").length}/${machines.length} machines`,
-		),
-	);
+	const connected = machines.filter(
+		(machine) => machine.status === "connected",
+	).length;
+	if (connected < machines.length)
+		summary.push(theme.fg("dim", `${connected}/${machines.length} machines`));
 	return summary.join(theme.fg("dim", " · "));
 }
 

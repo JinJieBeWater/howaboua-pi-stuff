@@ -2,11 +2,11 @@ import {
 	defineTool,
 	type ExtensionAPI,
 	getMarkdownTheme,
+	type Theme,
 } from "@earendil-works/pi-coding-agent";
 import { Container, Markdown, Spacer, Text } from "@earendil-works/pi-tui";
 import {
 	AgentsParameters,
-	type AgentsParams,
 	type AgentsToolParams,
 	parseAgentsRequest,
 	requiredAgentField as required,
@@ -32,6 +32,41 @@ import { resolvePiAgent } from "./herdr.js";
 import { attributeAgentPrompt } from "./messages/attribution.js";
 import type { createPeerCommands } from "./peer-commands.js";
 import type { SharedAgentContext } from "./shared-context.js";
+
+/** Failed validation still names what was attempted. */
+function requestedCall(args: unknown) {
+	let request: Record<string, unknown> = {};
+	try {
+		request = parseAgentsRequest(args) as Record<string, unknown>;
+	} catch {
+		if (typeof args === "object" && args !== null)
+			request = args as Record<string, unknown>;
+	}
+	const text = (field: string) =>
+		typeof request[field] === "string" ? request[field] : undefined;
+	return {
+		action: text("action") ?? "request",
+		identity:
+			text("target") ??
+			text("label") ??
+			text("name") ??
+			text("agent_type") ??
+			"",
+		message: text("message") ?? text("handoff"),
+	};
+}
+
+function callTitle(
+	action: string,
+	identity: string,
+	theme: Theme,
+	tone: "toolTitle" | "warning" = "toolTitle",
+): string {
+	return (
+		theme.fg(tone, theme.bold(`agents ${action}`)) +
+		(identity ? theme.fg("muted", ` · ${identity}`) : "")
+	);
+}
 
 export function createAgentsTool(
 	fleet: AgentFleet,
@@ -250,29 +285,23 @@ export function createAgentsTool(
 			throw new Error(`unsupported action ${params.action}`);
 		},
 		renderCall(args, theme, context) {
-			let params: AgentsParams | undefined;
-			try {
-				params = parseAgentsRequest(args);
-			} catch {
-				params = undefined;
-			}
-			const identity =
-				params?.target ??
-				params?.label ??
-				params?.name ??
-				params?.agent_type ??
-				"";
+			// renderResult draws settled collapsed rows whole; only it has the outcome.
+			if (context?.isPartial === false && !context.isError && !context.expanded)
+				return new Container();
+			const call = requestedCall(args);
 			const title = new Text(
-				theme.fg(
+				callTitle(
+					call.action,
+					call.identity,
+					theme,
 					context && "isBlocked" in context && context.isBlocked === true
 						? "warning"
 						: "toolTitle",
-					theme.bold(`agents ${params?.action ?? "request"}`),
-				) + (identity ? theme.fg("muted", ` · ${identity}`) : ""),
+				),
 				0,
 				0,
 			);
-			const message = params?.message ?? params?.handoff;
+			const message = call.message;
 			if (!context?.expanded || !message) return title;
 			const container = new Container();
 			container.addChild(title);
@@ -280,19 +309,52 @@ export function createAgentsTool(
 			container.addChild(new Text(message, 0, 0));
 			return container;
 		},
-		renderResult(toolResult, options, theme) {
+		renderResult(toolResult, options, theme, context) {
+			if (context?.isError) {
+				const error = toolResult.content
+					.flatMap((part) => (part.type === "text" ? [part.text] : []))
+					.join("\n");
+				return new Text(theme.fg("error", error || "agents failed"), 0, 0);
+			}
 			const details =
 				typeof toolResult.details === "object" && toolResult.details !== null
 					? (toolResult.details as Record<string, unknown>)
 					: {};
-			const state =
+			const reported =
 				typeof details["status"] === "string"
 					? details["status"]
 					: details["sent"] === true
 						? "sent"
 						: details["spawned"] === true
 							? "spawned"
-							: "done";
+							: undefined;
+			const state = reported ?? "done";
+			const tone =
+				state === "blocked"
+					? "warning"
+					: state === "working"
+						? "accent"
+						: "success";
+			if (!options.expanded && !options.isPartial && context) {
+				const call = requestedCall(context.args);
+				const name =
+					typeof details["name"] === "string" ? details["name"] : undefined;
+				const target =
+					typeof details["target"] === "string" ? details["target"] : "";
+				const count = Array.isArray(details["agents"])
+					? details["agents"].length +
+						(typeof details["moreAgents"] === "number"
+							? details["moreAgents"]
+							: 0)
+					: undefined;
+				return new Text(
+					callTitle(call.action, name ?? (call.identity || target), theme) +
+						(count === undefined ? "" : theme.fg("muted", ` · ${count}`)) +
+						(reported ? theme.fg(tone, ` · ${reported}`) : ""),
+					0,
+					0,
+				);
+			}
 			const target =
 				typeof details["name"] === "string"
 					? details["name"]
@@ -300,14 +362,7 @@ export function createAgentsTool(
 						? details["target"]
 						: "";
 			const title = new Text(
-				theme.fg(
-					state === "blocked"
-						? "warning"
-						: state === "working"
-							? "accent"
-							: "success",
-					[target, state].filter(Boolean).join(" · "),
-				),
+				theme.fg(tone, [target, state].filter(Boolean).join(" · ")),
 				0,
 				0,
 			);
