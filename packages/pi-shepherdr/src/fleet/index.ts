@@ -82,10 +82,13 @@ export class AgentFleet {
 	private readonly pi: ExtensionAPI;
 	private readonly runtimes = new Map<string, MachineRuntime>();
 	private localCoreId: string | undefined;
-	private lastPersisted: string | undefined;
+	private lastPersistedState: string | undefined;
 
 	constructor(pi: ExtensionAPI) {
 		this.pi = pi;
+		pi.on("session_tree", () => {
+			this.lastPersistedState = undefined;
+		});
 	}
 
 	async activate(ctx: ExtensionContext): Promise<void> {
@@ -189,7 +192,7 @@ export class AgentFleet {
 	deactivate(): void {
 		this.generation += 1;
 		this.localCoreId = undefined;
-		this.lastPersisted = undefined;
+		this.lastPersistedState = undefined;
 		for (const runtime of this.runtimes.values()) {
 			runtime.monitor?.deactivate();
 			if (
@@ -384,15 +387,16 @@ export class AgentFleet {
 
 	private changed(): void {
 		if (!this.context) return;
-		const state = {
+		const agents = this.persistedAgents();
+		const data = {
 			version: 2,
-			agents: this.persistedAgents(),
+			agents,
 			...(this.localCoreId ? { localCoreId: this.localCoreId } : {}),
 		};
-		const serialized = JSON.stringify(state);
-		if (serialized !== this.lastPersisted) {
-			this.pi.appendEntry(MONITOR_STATE_TYPE, state);
-			this.lastPersisted = serialized;
+		const serialized = JSON.stringify(data);
+		if (serialized !== this.lastPersistedState) {
+			this.pi.appendEntry(MONITOR_STATE_TYPE, data);
+			this.lastPersistedState = serialized;
 		}
 		this.refresh();
 	}

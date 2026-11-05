@@ -1,6 +1,9 @@
-import { StringEnum, Type } from "@earendil-works/pi-ai";
-import type { Static } from "typebox";
+import { type Static, Type } from "typebox";
 import { Check } from "typebox/value";
+
+function StringEnum<T extends readonly string[]>(values: T) {
+	return Type.Unsafe<T[number]>({ type: "string", enum: values });
+}
 
 const BOARD_ACTIONS = [
 	"help",
@@ -223,7 +226,7 @@ export function gptBoardHelp(value: unknown): unknown {
 		notify:
 			"agents_to_notify=once, excludes author; running turns ONLY; NO waking/offline notices",
 		agents:
-			"spawn's boardAgent: absolute /root/... OR relative child path; NOT pane/contextAgent",
+			"spawn's boardAgent:absolute /root/... OR relative child path; NOT pane/contextAgent",
 		paging:
 			"limit default20 cap50; opaque cursor→unchanged query/sort/full; concurrent changes MAY shift pages",
 		summaries:

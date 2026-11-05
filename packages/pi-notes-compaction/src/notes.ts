@@ -231,7 +231,9 @@ export function noteHints(
 	const paths = [
 		...new Set([...notes, ...store.cachedPaths(sourceSessionIds(ctx))]),
 	].slice(0, 5);
-	return paths.length ? `Recent notes: ${paths.join(", ")}`.slice(0, 4000) : "";
+	return paths.length
+		? `Recent notes in virtual filesystem: ${paths.join(", ")}`.slice(0, 4000)
+		: "";
 }
 
 export function useNotes(

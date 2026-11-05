@@ -8,6 +8,7 @@ import { contextAgentIdentity, contextTargetAgent } from "./agent-identity.js";
 import { type NotesOwner, OWNER_CHANNEL, type OwnerRequest } from "./bridge.js";
 import { optionalPccMissing } from "./integrations.js";
 import type { NotesLifecycle } from "./lifecycle.js";
+import { noteResult } from "./note-result.js";
 import { modelIsActive } from "./settings.js";
 import { registerContextSharingService } from "./sharing-service.js";
 
@@ -73,18 +74,27 @@ export async function registerNotesSharing(
 				);
 			if (!result?.details.externalNotesResponses?.length) return result;
 			const { externalNotesResponses, ...details } = result.details;
-			if (!remote.projectResult || remote.canProject?.(ctx) === false)
+			if (!remote.projectResult || remote.canProject?.(ctx) === false) {
+				const warning =
+					"Shared encrypted contents are unavailable on this model. Local results remain available. Use a compatible Codex model with PCC for remote contents.";
+				const data = result.structuredContent;
+				if (!data || typeof data !== "object" || Array.isArray(data))
+					throw new Error(
+						"Shared Notes data is invalid. Update Notes on the other agent and retry.",
+					);
 				return {
-					...result,
+					...noteResult({
+						...data,
+						warnings: [
+							...("warnings" in data && Array.isArray(data["warnings"])
+								? data["warnings"]
+								: []),
+							warning,
+						],
+					}),
 					details,
-					content: [
-						...result.content,
-						{
-							type: "text" as const,
-							text: "Shared encrypted contents are unavailable on this model. Local results remain available. Use a compatible Codex model with PCC for remote contents.",
-						},
-					],
 				};
+			}
 			return remote.projectResult(
 				{ ...result, details },
 				externalNotesResponses.map(({ bytesBase64, ...response }) => ({

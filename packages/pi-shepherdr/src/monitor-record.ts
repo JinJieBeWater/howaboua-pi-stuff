@@ -169,17 +169,6 @@ export function recordForPanel(
 	};
 }
 
-export function instructionFields(
-	record: MonitoredAgent | undefined,
-): Pick<MonitoredAgent, "instructions" | "latestInstruction"> {
-	return {
-		...(record?.instructions ? { instructions: record.instructions } : {}),
-		...(record?.latestInstruction
-			? { latestInstruction: record.latestInstruction }
-			: {}),
-	};
-}
-
 export function sameMonitorRecord(
 	left: MonitoredAgent,
 	right: MonitoredAgent,

@@ -1,9 +1,8 @@
 import { isDeepStrictEqual } from "node:util";
-import { Type } from "@earendil-works/pi-ai";
 import type { ExtensionContext } from "@earendil-works/pi-coding-agent";
 import { BindingSchema } from "@howaboua/pi-agent-board/integration";
 import type { SharedContextResult } from "@howaboua/pi-notes-compaction/context-sharing";
-import type { Static, TSchema } from "typebox";
+import { type Static, type TSchema, Type } from "typebox";
 import { Check } from "typebox/value";
 
 const AgentPath = Type.String({ pattern: "^/root(?:/[a-zA-Z0-9_-]+)*$" });
@@ -111,6 +110,19 @@ export function remapResult(
 	from: string,
 	to: string,
 ): SharedContextResult {
+	const remapField = (key: string, value: unknown) =>
+		(key === "path" || key === "agent_name") && typeof value === "string"
+			? remap(value, from, to)
+			: value;
+	const structured =
+		result.structuredContent === undefined
+			? {}
+			: {
+					structuredContent: JSON.parse(
+						JSON.stringify(result.structuredContent),
+						remapField,
+					),
+				};
 	if (
 		typeof result.details.codexHistoryNotes["encrypted_output"] === "string" ||
 		("externalNotesResponses" in result.details &&
@@ -122,32 +134,24 @@ export function remapResult(
 		result.details.codexHistoryNotes["attachment_hint"] = hint;
 		return {
 			...result,
+			...structured,
 			content: [{ type: "text", text: hint }, ...result.content],
 		};
 	}
 	const details = JSON.parse(
 		JSON.stringify(result.details.codexHistoryNotes),
-		(key, value: unknown) =>
-			(key === "path" || key === "agent_name") && typeof value === "string"
-				? remap(value, from, to)
-				: value,
+		remapField,
 	) as Record<string, unknown>;
 	return {
 		...result,
+		...structured,
 		// Remap the public payload, never regenerate it from private receipts.
 		content: result.content.map((item) => {
 			if (item.type !== "text") return item;
 			try {
 				return {
 					...item,
-					text: JSON.stringify(
-						JSON.parse(item.text, (key, value: unknown) =>
-							(key === "path" || key === "agent_name") &&
-							typeof value === "string"
-								? remap(value, from, to)
-								: value,
-						),
-					),
+					text: JSON.stringify(JSON.parse(item.text, remapField)),
 				};
 			} catch {
 				return item;

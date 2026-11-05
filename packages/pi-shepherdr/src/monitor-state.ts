@@ -6,7 +6,6 @@ import {
 	sameAgentActivity,
 } from "./activity.js";
 import {
-	instructionFields,
 	parseMonitoredAgent,
 	recordForPanel,
 	sameMonitorRecord,
@@ -124,7 +123,12 @@ export class MonitorState {
 			? ({ attemptId: randomUUID(), phase: "working" } as const)
 			: (existing?.activity ?? activityForPanel(panel));
 		const record = {
-			...instructionFields(existing),
+			...(existing?.instructions
+				? { instructions: existing.instructions }
+				: {}),
+			...(existing?.latestInstruction
+				? { latestInstruction: existing.latestInstruction }
+				: {}),
 			...recordForPanel(
 				panel,
 				activity,
@@ -184,13 +188,19 @@ export class MonitorState {
 	noteMessage(paneId: string, message: string): boolean {
 		const record = this.byPane(paneId);
 		if (!record) return false;
-		const prior = record.instructions ?? activityTask(record.activity);
-		// Keep the first and latest instruction only; appending every message grew snapshots and rollover briefings without bound.
-		const { latestInstruction: _, ...rest } = record;
+		const instructions =
+			record.instructions ?? activityTask(record.activity) ?? message;
+		const latestInstruction = message !== instructions ? message : undefined;
+		const { latestInstruction: previousInstruction, ...prior } = record;
+		if (
+			record.instructions === instructions &&
+			previousInstruction === latestInstruction
+		)
+			return false;
 		this.agents.set(record.terminalId, {
-			...rest,
-			instructions: prior ?? message,
-			...(prior && prior !== message ? { latestInstruction: message } : {}),
+			...prior,
+			instructions,
+			...(latestInstruction ? { latestInstruction } : {}),
 		});
 		return true;
 	}
@@ -390,7 +400,10 @@ export class MonitorState {
 			}
 
 			const updated = {
-				...instructionFields(record),
+				...(record.instructions ? { instructions: record.instructions } : {}),
+				...(record.latestInstruction
+					? { latestInstruction: record.latestInstruction }
+					: {}),
 				...recordForPanel(
 					panel,
 					activity,
