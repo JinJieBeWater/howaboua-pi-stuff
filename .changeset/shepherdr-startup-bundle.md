@@ -10,3 +10,4 @@
 - Agent event cards are shorter: long responses collapse to 16 lines, while paths and tasks move to the expanded view.
 - Blocked agent cards show the pending question without expanding.
 - Claude models can answer blocked agents with direct `agents reply` calls. JSON-shaped messages no longer fail with "message is required".
+- Agents that fail to start now report their last screen, so a prompt that stalled startup is visible after the terminal closes.

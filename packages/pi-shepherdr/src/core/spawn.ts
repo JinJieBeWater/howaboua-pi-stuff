@@ -12,6 +12,9 @@ import { RemoteCoreEndpoint } from "./remote-endpoint.js";
 import { remoteExec } from "./remote-exec.js";
 import { terminalPane, terminalSnapshot } from "./terminal.js";
 
+const SCREEN_READ_TIMEOUT_MS = 2_000;
+const SCREEN_MAX_LINES = 20;
+
 export async function startCoreAgent(
 	client: CoreConnection,
 	params: StartAgentParams,
@@ -83,15 +86,47 @@ export async function startCoreAgent(
 		const agent = await waitReady(client, terminal);
 		return { agent, id: terminal, cleanup };
 	} catch (error) {
+		const failure = await withStartupScreen(client, terminal, error);
 		try {
 			await client.request(cleanup.method, { id: cleanup.id });
 		} catch (cleanupError) {
 			throw new Error(
-				`${String(error)}; cleanup failed: ${String(cleanupError)}`,
-				{ cause: error },
+				`${String(failure)}; cleanup failed: ${String(cleanupError)}`,
+				{ cause: failure },
 			);
 		}
-		throw new RolledBackAgentLaunchError(error);
+		throw new RolledBackAgentLaunchError(failure);
+	}
+}
+
+// Rollback closes the terminal, so its screen must reach the error before then.
+async function withStartupScreen(
+	client: CoreConnection,
+	terminal: string,
+	error: unknown,
+): Promise<unknown> {
+	try {
+		const { text } = object(
+			await client.core.request(
+				"terminal.read",
+				{ terminal, lines: 0 },
+				{ signal: AbortSignal.timeout(SCREEN_READ_TIMEOUT_MS) },
+			),
+		);
+		const screen =
+			typeof text === "string"
+				? text
+						.split("\n")
+						.map((line) => line.trimEnd())
+						.filter(Boolean)
+						.slice(-SCREEN_MAX_LINES)
+						.join("\n")
+				: "";
+		if (!screen) return error;
+		const message = error instanceof Error ? error.message : String(error);
+		return new Error(`${message}\nLast screen:\n${screen}`, { cause: error });
+	} catch {
+		return error;
 	}
 }
 
@@ -108,20 +143,18 @@ async function waitReady(client: CoreConnection, terminal: string) {
 		const record = object(value);
 		if (record["state"] !== "live")
 			throw new Error(
-				`Core terminal ${terminal} exited before publishing its Pi session; inspect its output`,
+				`Core terminal ${terminal} exited before publishing its Pi session`,
 			);
 		const agent = terminalPane(record);
 		if (agent.agent_status === "blocked")
-			throw new Error(
-				`Core terminal ${terminal} is blocked during startup; inspect its output`,
-			);
+			throw new Error(`Core terminal ${terminal} is blocked during startup`);
 		if (agent.interactive_ready) resolve(agent);
 	};
 	const timer = setTimeout(
 		() =>
 			reject(
 				new Error(
-					`Timed out waiting for ${terminal} to publish its Pi session; inspect its output`,
+					`Timed out waiting for ${terminal} to publish its Pi session`,
 				),
 			),
 		30_000,
