@@ -206,27 +206,24 @@ where
                 let mut state = shared.lock().unwrap();
                 let queued = state.queue.len();
                 let draining = state.drain.is_some();
-                let ready = state.playback.ready(queued, rate, draining, Instant::now());
                 let frames = data.len() / channels;
+                let now = Instant::now();
+                let ready = state.playback.ready(queued, rate, frames, draining, now);
                 let queued = if ready { queued } else { 0 };
-                let first = if ready {
-                    state.queue.front().copied().unwrap_or(0.0)
-                } else {
-                    0.0
+                let padding = {
+                    let Shared {
+                        playback, queue, ..
+                    } = &mut *state;
+                    playback.padding(queue, rate, frames, draining)
                 };
-                let last = state
-                    .queue
-                    .get(queued.min(frames).saturating_sub(1))
-                    .copied()
-                    .unwrap_or(0.0);
                 let held = !ready && !state.queue.is_empty();
-                state.metrics.render(queued, frames, first, last, held);
                 if state.queue.is_empty()
                     && state
                         .last_playback
                         .is_none_or(|end| timestamp.callback >= end)
                     && let Some(id) = state.drain.take()
                 {
+                    state.playback.reset();
                     state.metrics.drain(true);
                     state
                         .responses
@@ -236,18 +233,29 @@ where
                 let mut reference = Vec::with_capacity(data.len() / channels);
                 let mut last = None;
                 for (index, frame) in data.chunks_exact_mut(channels).enumerate() {
-                    let sample =
-                        if let Some(sample) = ready.then(|| state.queue.pop_front()).flatten() {
-                            last = Some(index + 1);
-                            sample
-                        } else {
-                            0.0
-                        };
+                    let sample = if index < padding {
+                        0.0
+                    } else if let Some(sample) = ready.then(|| state.queue.pop_front()).flatten() {
+                        last = Some(index + 1);
+                        state.playback.played(sample, rate);
+                        sample
+                    } else {
+                        0.0
+                    };
                     let value = T::from_sample(sample);
                     frame.fill(value);
                     // Reference reflects the samples actually submitted, including format quantization and silence.
                     reference.push(f32::from_sample(value));
                 }
+                let supplied = (queued + padding).min(frames);
+                let first = reference.first().copied().unwrap_or(0.0);
+                let end = reference
+                    .get(supplied.saturating_sub(1))
+                    .copied()
+                    .unwrap_or(0.0);
+                state
+                    .metrics
+                    .render(queued, frames, first, end, held, padding);
                 if let Some(frames) = last {
                     state.last_playback = Some(
                         timestamp
@@ -257,7 +265,13 @@ where
                     );
                 }
                 if ready && state.queue.is_empty() {
-                    state.playback.depleted();
+                    let remaining = state.last_playback.map_or(Duration::ZERO, |end| {
+                        end.saturating_duration_since(timestamp.callback)
+                    });
+                    let rendered_until = now
+                        .checked_add(remaining)
+                        .unwrap_or_else(|| fail("Speaker timestamp overflow"));
+                    state.playback.depleted(rendered_until, rate);
                 }
                 state.render_delay = timestamp
                     .playback
