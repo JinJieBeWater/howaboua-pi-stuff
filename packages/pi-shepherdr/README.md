@@ -81,7 +81,7 @@ Blocking calls can run in parallel. In Code or Notebook, use `await Promise.allS
 
 Nonblocking extension messages notify the controller once; blocking messages arrive with the worker's blocked result. Both remain visible in `read` and later task reports until the producer closes them. Each replyable message includes a ready `reply` call with its machine, target, extension and message ID. Fill in the extension's reply template. `send` does not resolve an extension message.
 
-`reply` returns the extension's receipt after semantic delivery. Blocking messages also wait for resumed work unless another call already owns that wait. Nonblocking replies do not wait for the worker's task to finish. Shepherdr forwards strings unchanged. The producing extension owns their meaning, validation and retries.
+`reply` returns the extension's receipt after semantic delivery, and the resumed worker's result arrives as a background report. For a blocking message, set `blocking: true` to wait for that result unless another call already owns the wait. Shepherdr forwards strings unchanged. The producing extension owns their meaning, validation and retries.
 
 Use `send` for messages and work updates without adding supervision. Use `assign` to delegate work and receive its monitored result, automatically or through an explicit blocking call. It also accepts updates to running work, sharing that work's pending result rather than replacing it. If another call is already waiting, the update returns after submission and leaves that waiter intact. Close finished workers silently instead of waking them with completion acknowledgements or shutdown notices.
 

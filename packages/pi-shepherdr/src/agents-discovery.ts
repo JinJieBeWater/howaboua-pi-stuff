@@ -48,12 +48,12 @@ export async function agentsHelp(
 			attach: "target context board machine?",
 			detach: "target context board machine?",
 			read: "target machine? source=latest|visible|recent? lines?",
-			reply: "target extension id message machine?",
+			reply: "target extension id message machine? blocking?",
 		},
 		rules: {
 			reply: gpt
-				? "Extension report/read template required; send≠resolve; blocking waits resumed work; others return after semantic delivery"
-				: "Use the extension-authored template from its report/read; send does not resolve it. Blocking messages wait for resumed work; other replies return after semantic delivery",
+				? "Extension report/read template required; send≠resolve; return after semantic delivery; resumed work→background report"
+				: "Use the extension-authored template from its report/read; send does not resolve it. Returns after semantic delivery; resumed work reports in the background",
 			machine: gpt
 				? "machine omitted=local Pi host; list/find omitted=all machines; remote=list profile ID, NOT label/hostname"
 				: "Omit for local (host running Pi); list/find omit for all machines. Remote: profile ID from list, not label/hostname",
@@ -95,8 +95,8 @@ export async function agentsHelp(
 				? "Idle target; stop selected membership; counterpart checkpoints remain readonly"
 				: "Stop selected membership; retain counterpart checkpoints read-only; idle target",
 			blocking: gpt
-				? "spawn/assign default false→dispatch then return; true→wait for result; profile overrides spawn. Parallel blocking calls: await Promise.allSettled. Background reports automatic→do other work/end turn, NO poll or await timers/extra Promises"
-				: "spawn/assign return after dispatch by default. Set blocking:true to wait for the result; profile blocking overrides spawn. Use await Promise.allSettled for parallel blocking calls, including failures. Background reports arrive automatically: do other work or end this turn, never poll or await timers or extra Promises for reports",
+				? "spawn/assign/reply default false→dispatch then return; true→wait for result; profile overrides spawn. Parallel blocking calls: await Promise.allSettled. Background reports automatic→do other work/end turn, NO poll or await timers/extra Promises"
+				: "spawn/assign/reply return after dispatch by default. Set blocking:true to wait for the result; profile blocking overrides spawn. Use await Promise.allSettled for parallel blocking calls, including failures. Background reports arrive automatically: do other work or end this turn, never poll or await timers or extra Promises for reports",
 			share_context: gpt
 				? "Profile false→isolated notes/history; otherwise→controller sharing setting"
 				: "Profile false isolates notes/history; otherwise follows controller sharing setting",

@@ -52,7 +52,15 @@ const ACTION_FIELDS: Record<(typeof ACTIONS)[number], ReadonlySet<string>> = {
 	attach: new Set(["action", "machine", "target", "context", "board"]),
 	detach: new Set(["action", "machine", "target", "context", "board"]),
 	read: new Set(["action", "machine", "target", "source", "lines"]),
-	reply: new Set(["action", "machine", "target", "extension", "id", "message"]),
+	reply: new Set([
+		"action",
+		"machine",
+		"target",
+		"extension",
+		"id",
+		"message",
+		"blocking",
+	]),
 };
 
 const AgentsRequest = Type.Object(
@@ -216,8 +224,8 @@ export function isBlockingAgentsCall(input: unknown): boolean {
 				value.blocking,
 			);
 		return (
-			value.action === "reply" ||
-			(value.action === "assign" && value.blocking === true)
+			(value.action === "reply" || value.action === "assign") &&
+			value.blocking === true
 		);
 	} catch {
 		return false;

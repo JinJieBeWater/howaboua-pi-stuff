@@ -19,7 +19,6 @@ export interface ClaimedSettlement extends CollectedSettlement {
 }
 
 interface SettlementClaim {
-	replyingTo?: ExtensionReply;
 	cleanup(): void;
 	reject(error: Error): void;
 	resolve(settlement: ClaimedSettlement): void;
@@ -28,6 +27,8 @@ interface SettlementClaim {
 /** Claims are per-attempt capabilities; delivery chooses exactly one waiter or controller. */
 export class SettlementDelivery {
 	private readonly claims = new Map<string, SettlementClaim>();
+	// Outlives waiters: a stale blocked status must not re-report an answered message.
+	private readonly replies = new Map<string, ExtensionReply>();
 	private readonly pi: ExtensionAPI;
 	private readonly origin: {
 		machine: string;
@@ -42,9 +43,13 @@ export class SettlementDelivery {
 		this.origin = origin;
 	}
 	replyingTo(attemptId: string) {
-		return this.claims.get(attemptId)?.replyingTo;
+		return this.replies.get(attemptId);
+	}
+	noteReply(attemptId: string, reply: ExtensionReply) {
+		this.replies.set(attemptId, reply);
 	}
 	stop() {
+		this.replies.clear();
 		for (const claim of this.claims.values()) {
 			claim.cleanup();
 			claim.reject(new Error("Shepherdr monitor stopped"));
@@ -54,7 +59,6 @@ export class SettlementDelivery {
 	claim(
 		attempt: WorkAttempt,
 		signal: AbortSignal,
-		replyingTo?: ExtensionReply,
 	): Promise<ClaimedSettlement> | undefined {
 		signal.throwIfAborted();
 		// Updates share the worker's current settlement, without stealing its waiter.
@@ -72,7 +76,6 @@ export class SettlementDelivery {
 				);
 			};
 			const claim: SettlementClaim = {
-				...(replyingTo ? { replyingTo } : {}),
 				cleanup: () => signal.removeEventListener("abort", abort),
 				reject,
 				resolve,
@@ -93,6 +96,7 @@ export class SettlementDelivery {
 	}
 
 	releaseAttempt(attemptId: string, error: unknown): void {
+		this.replies.delete(attemptId);
 		const claim = this.claims.get(attemptId);
 		if (!claim) return;
 		this.claims.delete(attemptId);
@@ -108,6 +112,7 @@ export class SettlementDelivery {
 		blockedMessage: string | undefined,
 		reply: LatestAssistant | undefined,
 	): void {
+		if (attemptId) this.replies.delete(attemptId);
 		const claim = attemptId ? this.claims.get(attemptId) : undefined;
 		if (claim && attemptId) {
 			this.claims.delete(attemptId);

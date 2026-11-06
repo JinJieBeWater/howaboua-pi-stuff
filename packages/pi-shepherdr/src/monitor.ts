@@ -199,9 +199,12 @@ export class AgentMonitor {
 	claimWork(
 		attempt: WorkAttempt,
 		signal: AbortSignal,
-		replyingTo?: ExtensionReply,
 	): Promise<ClaimedSettlement> | undefined {
-		return this.settlements.claim(attempt, signal, replyingTo);
+		return this.settlements.claim(attempt, signal);
+	}
+
+	noteReply(attempt: WorkAttempt, reply: ExtensionReply): void {
+		this.settlements.noteReply(attempt, reply);
 	}
 
 	noteMessage(paneId: string, message: string): void {

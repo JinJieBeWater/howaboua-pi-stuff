@@ -97,12 +97,11 @@ export class SettlementReporter {
 		this.retries.clear();
 	}
 
-	claim(
-		attempt: WorkAttempt,
-		signal: AbortSignal,
-		replyingTo?: ExtensionReply,
-	) {
-		return this.delivery.claim(attempt, signal, replyingTo);
+	claim(attempt: WorkAttempt, signal: AbortSignal) {
+		return this.delivery.claim(attempt, signal);
+	}
+	noteReply(attempt: WorkAttempt, reply: ExtensionReply) {
+		this.delivery.noteReply(attempt.attemptId, reply);
 	}
 	releaseClaim(attempt: WorkAttempt | undefined, error: unknown) {
 		this.delivery.releaseClaim(attempt, error);

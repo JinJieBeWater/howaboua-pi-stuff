@@ -44,7 +44,7 @@ export async function replyAgent(
 		runtime,
 		panel,
 		`Reply to ${reply.extension}`,
-		true,
+		params.blocking === true,
 		signal,
 		onUpdate,
 		send,

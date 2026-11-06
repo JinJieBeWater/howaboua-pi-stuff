@@ -157,7 +157,7 @@ export async function dispatchAgentWork(
 		);
 		if (!attempt) throw new Error(`${panel.pane_id} is not monitored`);
 		settlement = blocking
-			? runtime.monitor.claimWork(attempt, signal, options.replyingTo)
+			? runtime.monitor.claimWork(attempt, signal)
 			: undefined;
 		void settlement?.catch(() => undefined);
 		signal.throwIfAborted();
@@ -200,6 +200,8 @@ export async function dispatchAgentWork(
 					await runtime.monitor.unwatch(record.paneId);
 			}
 		} else {
+			if (attempt && options.replyingTo)
+				runtime.monitor.noteReply(attempt, options.replyingTo);
 			runtime.monitor.acceptWork(attempt);
 			runtime.monitor.noteMessage(panel.pane_id, task);
 		}
