@@ -226,7 +226,7 @@ On first load, Shepherdr installs three editable profiles:
 - `explorer` uses `openai-codex/gpt-6-luna` with `high` thinking for read-only discovery
 - `reviewer` uses `openai-codex/gpt-6-luna` with `xhigh` thinking for generic read-only review
 
-Use `general` sparingly, mainly when requested or while orchestration is active. For work in the controller's repository, create and prepare a dedicated worktree, then pass it as `cwd`.
+Use `general` for independent implementation scopes, requested or not. For work in the controller's repository, create and prepare a dedicated worktree, then pass it as `cwd`.
 
 Profiles live under:
 

@@ -114,7 +114,7 @@ export async function agentsHelp(
 				: "Reuse only same investigation; reviews independent; new scope = new agent",
 			...(profiles.has("general")
 				? {
-						general: "Only when requested/orchestrating",
+						general: "Independent implementation scopes",
 					}
 				: {}),
 		},
