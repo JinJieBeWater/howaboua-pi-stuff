@@ -103,7 +103,11 @@ export class RemoteCoreEndpoint {
 						terminals: [],
 					});
 				else if (message.method === "heartbeat") onNotification(message);
-				else if (message.method === "event")
+				else if (
+					message.method === "event" &&
+					// Host-local terminals (no machine prefix) cannot change this machine.
+					(!message.event.terminal || message.event.terminal.includes("/"))
+				)
 					onNotification({
 						...message,
 						event: {

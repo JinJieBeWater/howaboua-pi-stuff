@@ -7,6 +7,9 @@ import { createInterface } from "node:readline";
 const chunks = [];
 for await (const chunk of process.stdin) chunks.push(chunk);
 const input = JSON.parse(Buffer.concat(chunks).toString());
+// Installed beside its modules: relay scripts elsewhere need absolute URLs.
+for (const [name, specifier] of Object.entries(input.modules))
+	input.modules[name] = new URL(specifier, import.meta.url).href;
 const child = spawn(
 	"hc",
 	["connect", "--session", input.session || "default"],
