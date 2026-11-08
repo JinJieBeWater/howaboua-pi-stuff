@@ -10,3 +10,4 @@
 - Blocked agent cards show the pending question without expanding.
 - Claude models can answer blocked agents with direct `agents reply` calls. JSON-shaped messages no longer fail with "message is required".
 - Agents that fail to start now report their last screen, so a prompt that stalled startup is visible after the terminal closes.
+- `reply` now returns once the answer is delivered, so a long-running worker no longer holds the controller; its result arrives as a background report. Set `blocking: true` to wait for it.
