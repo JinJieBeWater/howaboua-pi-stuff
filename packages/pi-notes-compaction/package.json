@@ -1,6 +1,6 @@
 {
 	"name": "@howaboua/pi-notes-compaction",
-	"version": "0.0.14",
+	"version": "0.0.15",
 	"publishConfig": {
 		"access": "public"
 	},
@@ -67,6 +67,8 @@
 			"types": "./src/context-sharing.ts",
 			"import": "./dist/context-sharing.js",
 			"default": "./dist/context-sharing.js"
-		}
+		},
+		"./saved-session": "./src/saved-session.mjs",
+		"./saved-session-index": "./src/saved-session-index.mjs"
 	}
 }
