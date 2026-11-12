@@ -1,0 +1,68 @@
+$ bun run lint && bun run typecheck
+$ biome check .
+/Users/jinjiebewater/my/personal/fork/howaboua-pi-stuff/packages/pi-ask/biome.json:2:13 deserialize ━━━━━━━━━━
+
+  i The configuration schema version does not match the CLI version 2.6.7
+
+    1 │ {
+  > 2 │ 	"$schema": "https://biomejs.dev/schemas/2.6.6/schema.json",
+      │ 	           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    3 │ 	"vcs": {
+    4 │ 		"enabled": true,
+
+  i   Expected:                     2.6.7
+      Found:                        2.6.6
+
+
+  i Run the command biome migrate to migrate the configuration file.
+
+
+biome.json:2:13 deserialize ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The configuration schema version does not match the CLI version 2.6.7
+
+    1 │ {
+  > 2 │ 	"$schema": "https://biomejs.dev/schemas/2.6.6/schema.json",
+      │ 	           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    3 │ 	"vcs": {
+    4 │ 		"enabled": true,
+
+  i   Expected:                     2.6.7
+      Found:                        2.6.6
+
+
+  i Run the command biome migrate to migrate the configuration file.
+
+
+Checked 24 files in 11ms. No fixes applied.
+Found 1 info.
+$ tsgo --noEmit
+index.ts(64,25): error TS2345: Argument of type 'import("/Users/jinjiebewater/my/personal/fork/howaboua-pi-stuff/node_modules/.bun/@earendil-works+pi-coding-agent@1.5.2+2f13fe1485991f07/node_modules/@earendil-works/pi-coding-agent/dist/core/extensions/types").ExtensionAPI' is not assignable to parameter of type 'import("/Users/jinjiebewater/my/personal/fork/howaboua-pi-stuff/node_modules/.bun/@earendil-works+pi-coding-agent@1.5.0+2f13fe1485991f07/node_modules/@earendil-works/pi-coding-agent/dist/core/extensions/types").ExtensionAPI'.
+  Types of property 'on' are incompatible.
+    Type '{ (event: "project_trust", handler: import("/Users/jinjiebewater/my/personal/fork/howaboua-pi-stuff/node_modules/.bun/@earendil-works+pi-coding-agent@1.5.2+2f13fe1485991f07/node_modules/@earendil-works/pi-coding-agent/dist/core/extensions/types").ProjectTrustHandler): () => void; (event: "resources_discover", handle...' is not assignable to type '{ (event: "project_trust", handler: import("/Users/jinjiebewater/my/personal/fork/howaboua-pi-stuff/node_modules/.bun/@earendil-works+pi-coding-agent@1.5.0+2f13fe1485991f07/node_modules/@earendil-works/pi-coding-agent/dist/core/extensions/types").ProjectTrustHandler): () => void; (event: "resources_discover", handle...'.
+      Types of parameters 'event' and 'event' are incompatible.
+        Type '"resources_discover"' is not assignable to type '"project_trust"'.
+index.ts(104,3): error TS2322: Type '(pi: ExtensionAPI, content: string, options?: CodexDeveloperMessageOptions | undefined) => boolean' is not assignable to type 'TryCodexDeveloperMessage'.
+  Types of parameters 'pi' and 'pi' are incompatible.
+    Type 'import("/Users/jinjiebewater/my/personal/fork/howaboua-pi-stuff/node_modules/.bun/@earendil-works+pi-coding-agent@1.5.2+2f13fe1485991f07/node_modules/@earendil-works/pi-coding-agent/dist/core/extensions/types").ExtensionAPI' is not assignable to type 'import("/Users/jinjiebewater/my/personal/fork/howaboua-pi-stuff/node_modules/.bun/@earendil-works+pi-coding-agent@1.5.0+2f13fe1485991f07/node_modules/@earendil-works/pi-coding-agent/dist/core/extensions/types").ExtensionAPI'.
+      Types of property 'on' are incompatible.
+        Type '{ (event: "project_trust", handler: import("/Users/jinjiebewater/my/personal/fork/howaboua-pi-stuff/node_modules/.bun/@earendil-works+pi-coding-agent@1.5.2+2f13fe1485991f07/node_modules/@earendil-works/pi-coding-agent/dist/core/extensions/types").ProjectTrustHandler): () => void; (event: "resources_discover", handle...' is not assignable to type '{ (event: "project_trust", handler: import("/Users/jinjiebewater/my/personal/fork/howaboua-pi-stuff/node_modules/.bun/@earendil-works+pi-coding-agent@1.5.0+2f13fe1485991f07/node_modules/@earendil-works/pi-coding-agent/dist/core/extensions/types").ProjectTrustHandler): () => void; (event: "resources_discover", handle...'.
+          Types of parameters 'event' and 'event' are incompatible.
+            Type '"resources_discover"' is not assignable to type '"project_trust"'.
+index.ts(122,55): error TS2345: Argument of type 'import("/Users/jinjiebewater/my/personal/fork/howaboua-pi-stuff/node_modules/.bun/@earendil-works+pi-coding-agent@1.5.2+2f13fe1485991f07/node_modules/@earendil-works/pi-coding-agent/dist/core/extensions/types").ExtensionAPI' is not assignable to parameter of type 'import("/Users/jinjiebewater/my/personal/fork/howaboua-pi-stuff/node_modules/.bun/@earendil-works+pi-coding-agent@1.5.0+2f13fe1485991f07/node_modules/@earendil-works/pi-coding-agent/dist/core/extensions/types").ExtensionAPI'.
+  Types of property 'on' are incompatible.
+    Type '{ (event: "project_trust", handler: import("/Users/jinjiebewater/my/personal/fork/howaboua-pi-stuff/node_modules/.bun/@earendil-works+pi-coding-agent@1.5.2+2f13fe1485991f07/node_modules/@earendil-works/pi-coding-agent/dist/core/extensions/types").ProjectTrustHandler): () => void; (event: "resources_discover", handle...' is not assignable to type '{ (event: "project_trust", handler: import("/Users/jinjiebewater/my/personal/fork/howaboua-pi-stuff/node_modules/.bun/@earendil-works+pi-coding-agent@1.5.0+2f13fe1485991f07/node_modules/@earendil-works/pi-coding-agent/dist/core/extensions/types").ProjectTrustHandler): () => void; (event: "resources_discover", handle...'.
+      Types of parameters 'event' and 'event' are incompatible.
+        Type '"resources_discover"' is not assignable to type '"project_trust"'.
+index.ts(123,25): error TS2379: Argument of type 'ToolDefinition<Schema<{ help?: true; handoff?: boolean; prompts?: { title: string; body?: string; multiple?: boolean; choices?: { label: string; description?: string; }[]; }[]; delivery?: "steer" | "wait"; }>, unknown, any> & AnyToolDefinition' is not assignable to parameter of type 'ToolDefinition<any, any, any>' with 'exactOptionalPropertyTypes: true'. Consider adding 'undefined' to the types of the target's properties.
+  Types of property 'execute' are incompatible.
+    Type '((toolCallId: string, params: unknown, signal: AbortSignal | undefined, onUpdate: AgentToolUpdateCallback<unknown> | undefined, ctx: ExtensionToolContext) => Promise<...>) & ((toolCallId: string, params: unknown, signal: AbortSignal | undefined, onUpdate: AgentToolUpdateCallback<...> | undefined, ctx: ExtensionToolC...' is not assignable to type '(toolCallId: string, params: unknown, signal: AbortSignal | undefined, onUpdate: AgentToolUpdateCallback<any> | undefined, ctx: ExtensionToolContext) => Promise<...>'.
+      Types of parameters 'ctx' and 'ctx' are incompatible.
+        Type 'import("/Users/jinjiebewater/my/personal/fork/howaboua-pi-stuff/node_modules/.bun/@earendil-works+pi-coding-agent@1.5.0+2f13fe1485991f07/node_modules/@earendil-works/pi-coding-agent/dist/core/extensions/types").ExtensionToolContext' is not assignable to type 'import("/Users/jinjiebewater/my/personal/fork/howaboua-pi-stuff/node_modules/.bun/@earendil-works+pi-coding-agent@1.5.2+2f13fe1485991f07/node_modules/@earendil-works/pi-coding-agent/dist/core/extensions/types").ExtensionToolContext' with 'exactOptionalPropertyTypes: true'. Consider adding 'undefined' to the types of the target's properties.
+          The types of 'ui.setWidget' are incompatible between these types.
+            Type '{ (key: string, content: string[] | undefined, options?: import("/Users/jinjiebewater/my/personal/fork/howaboua-pi-stuff/node_modules/.bun/@earendil-works+pi-coding-agent@1.5.0+2f13fe1485991f07/node_modules/@earendil-works/pi-coding-agent/dist/core/extensions/types").ExtensionWidgetOptions | undefined): void; (key: ...' is not assignable to type '{ (key: string, content: string[] | undefined, options?: import("/Users/jinjiebewater/my/personal/fork/howaboua-pi-stuff/node_modules/.bun/@earendil-works+pi-coding-agent@1.5.2+2f13fe1485991f07/node_modules/@earendil-works/pi-coding-agent/dist/core/extensions/types").ExtensionWidgetOptions | undefined): void; (key: ...'.
+              Types of parameters 'content' and 'content' are incompatible.
+                Type '((tui: TUI, theme: Theme) => Component & { dispose?(): void; }) | undefined' is not assignable to type 'string[] | undefined'.
+                  Type '(tui: TUI, theme: Theme) => Component & { dispose?(): void; }' is not assignable to type 'string[]'.
+error: script "typecheck" exited with code 1
+error: script "check" exited with code 1

@@ -1,0 +1,39 @@
+$ bun run lint && bun run typecheck
+$ biome check .
+/Users/jinjiebewater/my/personal/fork/howaboua-pi-stuff/packages/pi-codex-imagegen/biome.json:2:13 deserialize ━━━━━━━━━━
+
+  i The configuration schema version does not match the CLI version 2.6.7
+
+    1 │ {
+  > 2 │ 	"$schema": "https://biomejs.dev/schemas/2.6.6/schema.json",
+      │ 	           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    3 │ 	"vcs": {
+    4 │ 		"enabled": true,
+
+  i   Expected:                     2.6.7
+      Found:                        2.6.6
+
+
+  i Run the command biome migrate to migrate the configuration file.
+
+
+biome.json:2:13 deserialize ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The configuration schema version does not match the CLI version 2.6.7
+
+    1 │ {
+  > 2 │ 	"$schema": "https://biomejs.dev/schemas/2.6.6/schema.json",
+      │ 	           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    3 │ 	"vcs": {
+    4 │ 		"enabled": true,
+
+  i   Expected:                     2.6.7
+      Found:                        2.6.6
+
+
+  i Run the command biome migrate to migrate the configuration file.
+
+
+Checked 30 files in 17ms. No fixes applied.
+Found 1 info.
+$ tsgo --noEmit

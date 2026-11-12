@@ -1,0 +1,23 @@
+bun install v1.4.4 (38afee6c8)
+Resolving dependencies
+Resolved, downloaded and extracted [30]
+Saved lockfile
+
+Saved bun.lock (481 packages) [10.26s]
+bun install v1.4.4 (38afee6c8)
+
++ @biomejs/biome@2.6.7
++ @types/better-sqlite3@9.6.0
++ @types/node@26.6.6
+
+18 packages installed [35.40s]
+bun install v1.4.4 (38afee6c8)
+Saved lockfile
+
+Saved bun.lock (473 packages) [26.00ms]
+bun install v1.4.4 (38afee6c8)
+
+Checked 359 installs across 473 packages (no changes) [11.00ms]
+bun install v1.4.4 (38afee6c8)
+
+Checked 359 installs across 473 packages (no changes) [36.00ms]

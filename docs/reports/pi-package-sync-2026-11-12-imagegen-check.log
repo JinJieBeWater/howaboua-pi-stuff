@@ -1,0 +1,46 @@
+$ bun run lint && bun run typecheck
+$ biome check .
+/Users/jinjiebewater/my/personal/fork/howaboua-pi-stuff/packages/pi-codex-imagegen/biome.json:2:13 deserialize ━━━━━━━━━━
+
+  i The configuration schema version does not match the CLI version 2.6.7
+
+    1 │ {
+  > 2 │ 	"$schema": "https://biomejs.dev/schemas/2.6.6/schema.json",
+      │ 	           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    3 │ 	"vcs": {
+    4 │ 		"enabled": true,
+
+  i   Expected:                     2.6.7
+      Found:                        2.6.6
+
+
+  i Run the command biome migrate to migrate the configuration file.
+
+
+biome.json:2:13 deserialize ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The configuration schema version does not match the CLI version 2.6.7
+
+    1 │ {
+  > 2 │ 	"$schema": "https://biomejs.dev/schemas/2.6.6/schema.json",
+      │ 	           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    3 │ 	"vcs": {
+    4 │ 		"enabled": true,
+
+  i   Expected:                     2.6.7
+      Found:                        2.6.6
+
+
+  i Run the command biome migrate to migrate the configuration file.
+
+
+Checked 30 files in 11ms. No fixes applied.
+Found 1 info.
+$ tsgo --noEmit
+index.ts(48,25): error TS2345: Argument of type 'import("/Users/jinjiebewater/my/personal/fork/howaboua-pi-stuff/node_modules/.bun/@earendil-works+pi-coding-agent@1.5.2+2f13fe1485991f07/node_modules/@earendil-works/pi-coding-agent/dist/core/extensions/types").ExtensionAPI' is not assignable to parameter of type 'import("/Users/jinjiebewater/my/personal/fork/howaboua-pi-stuff/node_modules/.bun/@earendil-works+pi-coding-agent@1.5.0+2f13fe1485991f07/node_modules/@earendil-works/pi-coding-agent/dist/core/extensions/types").ExtensionAPI'.
+  Types of property 'on' are incompatible.
+    Type '{ (event: "project_trust", handler: import("/Users/jinjiebewater/my/personal/fork/howaboua-pi-stuff/node_modules/.bun/@earendil-works+pi-coding-agent@1.5.2+2f13fe1485991f07/node_modules/@earendil-works/pi-coding-agent/dist/core/extensions/types").ProjectTrustHandler): () => void; (event: "resources_discover", handle...' is not assignable to type '{ (event: "project_trust", handler: import("/Users/jinjiebewater/my/personal/fork/howaboua-pi-stuff/node_modules/.bun/@earendil-works+pi-coding-agent@1.5.0+2f13fe1485991f07/node_modules/@earendil-works/pi-coding-agent/dist/core/extensions/types").ProjectTrustHandler): () => void; (event: "resources_discover", handle...'.
+      Types of parameters 'event' and 'event' are incompatible.
+        Type '"resources_discover"' is not assignable to type '"project_trust"'.
+error: script "typecheck" exited with code 1
+error: script "check" exited with code 1
