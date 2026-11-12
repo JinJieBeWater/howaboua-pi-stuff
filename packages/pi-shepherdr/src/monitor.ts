@@ -209,9 +209,6 @@ export class AgentMonitor {
 	noteReply(attempt: WorkAttempt, reply: ExtensionReply): void {
 		this.settlements.noteReply(attempt, reply);
 	}
-	observeReply(attempt: WorkAttempt, reply: ExtensionReply): void {
-		this.settlements.observeReply(attempt, reply);
-	}
 
 	noteMessage(paneId: string, message: string): void {
 		if (this.state.noteMessage(paneId, message)) this.persist();

@@ -24,13 +24,9 @@ interface SettlementWaiter {
 	resolve(settlement: ClaimedSettlement): void;
 }
 
-type SettlementClaim =
-	| { replyingTo: ExtensionReply; waiter?: SettlementWaiter }
-	| { replyingTo?: ExtensionReply; waiter: SettlementWaiter };
-
 /** Claims are per-attempt capabilities; delivery chooses exactly one waiter or controller. */
 export class SettlementDelivery {
-	private readonly claims = new Map<string, SettlementClaim>();
+	private readonly claims = new Map<string, SettlementWaiter>();
 	// Outlives waiters: a stale blocked status must not re-report an answered message.
 	private readonly replies = new Map<string, ExtensionReply>();
 	private readonly pi: ExtensionAPI;
@@ -52,18 +48,11 @@ export class SettlementDelivery {
 	noteReply(attemptId: string, reply: ExtensionReply) {
 		this.replies.set(attemptId, reply);
 	}
-	observeReply(attempt: WorkAttempt, reply: ExtensionReply): void {
-		const claim = this.claims.get(attempt.attemptId);
-		this.claims.set(attempt.attemptId, {
-			...(claim?.waiter ? { waiter: claim.waiter } : {}),
-			replyingTo: reply,
-		});
-	}
 	stop() {
 		this.replies.clear();
 		for (const claim of this.claims.values()) {
-			claim.waiter?.cleanup();
-			claim.waiter?.reject(new Error("Shepherdr monitor stopped"));
+			claim.cleanup();
+			claim.reject(new Error("Shepherdr monitor stopped"));
 		}
 		this.claims.clear();
 	}
@@ -73,30 +62,24 @@ export class SettlementDelivery {
 	): Promise<ClaimedSettlement> | undefined {
 		signal.throwIfAborted();
 		// Updates share the worker's current settlement, without stealing its waiter.
-		const existing = this.claims.get(attempt.attemptId);
-		if (existing?.waiter) return;
-		const reply = existing?.replyingTo;
+		if (this.claims.has(attempt.attemptId)) return;
 		return new Promise<ClaimedSettlement>((resolve, reject) => {
 			const abort = () => {
 				const claim = this.claims.get(attempt.attemptId);
 				if (!claim) return;
 				this.claims.delete(attempt.attemptId);
-				claim.waiter?.cleanup();
+				claim.cleanup();
 				reject(
 					signal.reason instanceof Error
 						? signal.reason
 						: new Error("Shepherdr wait aborted"),
 				);
 			};
-			const claim: SettlementClaim = {
-				...(reply ? { replyingTo: reply } : {}),
-				waiter: {
-					cleanup: () => signal.removeEventListener("abort", abort),
-					reject,
-					resolve,
-				},
-			};
-			this.claims.set(attempt.attemptId, claim);
+			this.claims.set(attempt.attemptId, {
+				cleanup: () => signal.removeEventListener("abort", abort),
+				reject,
+				resolve,
+			});
 			signal.addEventListener("abort", abort, { once: true });
 		});
 	}
@@ -116,10 +99,8 @@ export class SettlementDelivery {
 		const claim = this.claims.get(attemptId);
 		if (!claim) return;
 		this.claims.delete(attemptId);
-		claim.waiter?.cleanup();
-		claim.waiter?.reject(
-			error instanceof Error ? error : new Error(String(error)),
-		);
+		claim.cleanup();
+		claim.reject(error instanceof Error ? error : new Error(String(error)));
 	}
 
 	deliverSettlement(
@@ -134,15 +115,13 @@ export class SettlementDelivery {
 		const claim = attemptId ? this.claims.get(attemptId) : undefined;
 		if (claim && attemptId) {
 			this.claims.delete(attemptId);
-		}
-		if (claim?.waiter) {
-			claim.waiter.cleanup();
+			claim.cleanup();
 			const {
 				reply: _latestReply,
 				session: _session,
 				...claimedSettlement
 			} = settlement;
-			claim.waiter.resolve({
+			claim.resolve({
 				...claimedSettlement,
 				record,
 				...(blockedMessage ? { blockedMessage } : {}),

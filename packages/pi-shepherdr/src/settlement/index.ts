@@ -111,9 +111,6 @@ export class SettlementReporter {
 	noteReply(attempt: WorkAttempt, reply: ExtensionReply) {
 		this.delivery.noteReply(attempt.attemptId, reply);
 	}
-	observeReply(attempt: WorkAttempt, reply: ExtensionReply): void {
-		this.delivery.observeReply(attempt, reply);
-	}
 	releaseClaim(attempt: WorkAttempt | undefined, error: unknown) {
 		this.delivery.releaseClaim(attempt, error);
 	}

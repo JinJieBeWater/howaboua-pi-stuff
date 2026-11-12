@@ -30,7 +30,6 @@ export class MonitorEvents {
 	private refreshTask: Promise<void> | undefined;
 	private pending: SubscriptionAttempt | undefined;
 	private reconnectTimer: NodeJS.Timeout | undefined;
-	private reconnectDelay = 1_000;
 	private subscription: Subscription | undefined;
 	private warning: "degraded" | "unavailable" | undefined;
 
@@ -51,7 +50,6 @@ export class MonitorEvents {
 		this.cancelPending();
 		this.closeSubscription();
 		this.warning = undefined;
-		this.reconnectDelay = 1_000;
 		this.clearReconnect();
 	}
 
@@ -195,7 +193,6 @@ export class MonitorEvents {
 	}
 
 	private recovered(): void {
-		this.reconnectDelay = 1_000;
 		if (!this.warning) return;
 		this.warning = undefined;
 		this.options.onRecovered();
@@ -217,9 +214,7 @@ export class MonitorEvents {
 				this.warn();
 				this.scheduleReconnect();
 			});
-		}, this.reconnectDelay);
-		// Back off so a slow remote line is not flooded with overlapping retries.
-		this.reconnectDelay = Math.min(this.reconnectDelay * 2, 30_000);
+		}, 1_000);
 		this.reconnectTimer.unref();
 	}
 }

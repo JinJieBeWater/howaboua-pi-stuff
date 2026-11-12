@@ -1,6 +1,6 @@
 # 上游与 fork 差异精简审查
 
-2026-11-12。只读审查产品代码；本次仅新增此报告，没有实施清理。
+2026-11-12。先只读审查，随后按用户授权实施三项清理。审查部分保留当时基线，实施及验证见末节。
 
 ## 基线与量级
 
@@ -100,3 +100,28 @@ Notes/Board 独立包里的同内容文件由上游同步脚本生成，不是�
 探针在内存中加载上游单个模块，依赖使用当前相同实现，没有修改上游、已安装工具或用户配置，没有模型/网络工具请求。已有全量同步门禁见 [同步报告](pi-fork-all-extensions-update-2026-11-12.md)，本次不重复宣称其覆盖清理后的候选。
 
 建议先处理 observer 死链、已失去远程用途的退避及重复发布说明；UI 取舍和启动打包分别决策。尚未实施任何建议，未删除产品代码或数据。两个分工审查代理已经关闭，未创建 worktree、辅助分支或持久探针。
+
+## 授权后的清理结果
+
+用户随后授权清理。实施基线为 `85bedf84`，工作区干净，仍在现有 `dev`；再次查询 fork 的 dev → main PR，结果为空，没有对分支做对齐或重置。
+
+- 删除 `observeReply` 调用及透传，`claims` 直接保存 waiter，移除无消费者的 `claims.replyingTo` 和可选 waiter 包装。独立 `replies`、投递回执后的记录时机、取消/释放/停止的清理及未等待结果的后台报告路径保留。
+- `monitor-events.ts` 恢复上游固定一秒的本机重连，与审查时固定的 `upstream/main` 该文件逐字相同。远程仍由 fleet 管理连接，不新增自动重连计时器。
+- 更新现有且唯一的 Shepherdr changeset，移除远程 helper 复用、退避及默认非阻塞的重复声明；仅保留显式 `blocking: true` 的 fork 增量。没有新增 changeset 或手动改版本。
+
+五个运行时文件合计 +15 / -50，净减少 35 行；没有删除整份仓库文件或用户数据。界面定制、启动打包及其他保留项未改。
+
+验证结果：
+
+| 检查 | 结果 |
+| --- | --- |
+| 改前相同重连场景 | 观察到 1000 / 2000 / 4000 ms，一秒固定间隔断言按预期失败 |
+| 改后 MonitorEvents 聚焦探针 | 连续失败均为 1000 ms；恢复后取消重试，断线重新计时，stop 清除计时且过期回调不重订阅；远程失败不加计时器 |
+| 回复生命周期探针 | 第二次 claim 不抢 waiter；取消等待仍保留已答问题；重新等待可接收完成结果；完成、release、stop 清除相应记录 |
+| 实际 dispatchAgentWork 路径探针 | mock monitor 不提供 observeReply；正常回执后记账、失败不记账、命令不保留回复记录、显式 blocking 接收 settlement 均通过 |
+| `bun run --cwd packages/pi-shepherdr check` | 退出 0；Biome 检查 136 文件通过，`tsgo --noEmit` 通过 |
+| `bun run --cwd packages/pi-shepherdr build` | 退出 0；已重建本 checkout 的忽略产物 |
+| Node 导入 `dist/index.js` | 退出 0，默认导出仍是扩展工厂 |
+| `git diff --check` / 清理残留检索 | 通过；运行时不再包含 observeReply、SettlementClaim 或 reconnectDelay |
+
+按 ponytail-review 检查调用方、waiter 独占与取消、投递失败清理、未等待结果投递及重连停止路径，没有发现需要追加修复的问题。使用一次性探针，未新增永久测试；探针已删除。未运行 live TUI、真实跨机故障或启动性能测量，也没有重载当前 Pi 会话；本地源码构建不等于正在运行的会话已采用新实现。没有 push、发布或修改安装配置。

@@ -160,9 +160,6 @@ export async function dispatchAgentWork(
 		settlement = blocking
 			? runtime.monitor.claimWork(attempt, signal)
 			: undefined;
-		if (!blocking && options.replyingTo) {
-			runtime.monitor.observeReply(attempt, options.replyingTo);
-		}
 		void settlement?.catch(() => undefined);
 		signal.throwIfAborted();
 		sendStarted = true;
