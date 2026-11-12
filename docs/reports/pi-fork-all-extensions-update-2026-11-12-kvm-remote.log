@@ -1,0 +1,2 @@
+PASS: updated Shepherdr accepts KVM Core 0.1.20 and its stable machine identity.
+PASS: new remote helper answers a read-only Saved Notes lookup with no matching session.

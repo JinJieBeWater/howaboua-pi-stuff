@@ -48,10 +48,14 @@
 
 ## 主机依赖及删除
 
-本机 `hc 0.1.20` 满足新 Shepherdr 的 Core >=0.1.18 要求。KVM 的 CLI 和运行中 Core 均为 0.1.17，不满足远程连接的 machineIdentity 版本检查；本次未擅自重启或升级它。需要独立完成 KVM Core 更新后才能把远程协作标为可用。原生 `hc update --version 0.1.20` 会更新并重启 Core，终端按工具说明保留。
+本机 `hc 0.1.20` 满足新 Shepherdr 的 Core >=0.1.18 要求。初查 KVM 的 CLI 和 Core 均为 0.1.17，因此在全部本机更新完成后，单独请求会重启共享 Core 的操作授权。用户明确选择升级后，通过 `hc run --on kvm hc update --version 0.1.20` 完成升级，退出 0；原生结果为 `hc 0.1.17 -> hc 0.1.20; core running again ... terminals kept`。机器目录重新显示 KVM connected/version 0.1.20，远程 CLI 也返回 0.1.20。
+
+使用机器稳定 ID 调用 agents.list 成功，KVM 当前没有运行中的代理。另用更新后的 Shepherdr 源码与正式 Node 运行环境、`coreMachines()` 目录归一化路径验证：machineIdentity 接受 KVM Core 0.1.20，新的远程 helper 对不存在的 UUID 完成只读 Saved Notes 查询并返回空数组。未创建真实代理任务，未写用户 notes 或数据库。完整跨机器代理生命周期、真实模型或图片请求仍不在本次验证范围。
+
+远程读取探针的失败均已定位为验证脚手架问题：Bun 在本机 Unix socket realpath 上报 EOPNOTSUPP，临时 .ts 被 tsx 当作 CJS，以及直接传入原始目录的 session:null。改用 Pi 相同的 Node 环境、.mts 和应用正式 coreMachines() 路径后，原读取场景通过；没有为这些探针问题修改扩展源码。
 
 删除项来自上游重构：旧 Shepherdr 15 个远程/legacy 模块、部分被移动或替代的 Notes/Board 文件，以及 fork 重复的 Shepherdr changeset。完整删除记录见 Git diff 与 Shepherdr 报告。没有删除用户任务、notes、board、数据库或日志；agents-cron 保持卸载状态。
 
 ## 本机安装收尾
 
-已将原 dev 快进到整合结果，在真实 checkout 再次执行 `bun run install:ci`，退出 0；使用实际 checkout 和当前偏好的隔离副本重放加载检查，27 个扩展零加载错误、8 个既有 profile 与 Notes/Board 配置解析通过。不重跑已有效的同源码包级门禁。cron 包与定时入口仍不存在，任务 JSON 的原 SHA-256 保持不变。临时整合 worktree 和分支已清理；当前运行会话仍需空闲后 reload 或重开才能采用完整的新模块。KVM Core 的独立升级尚待授权。
+已将原 dev 快进到整合结果，在真实 checkout 再次执行 `bun run install:ci`，退出 0；使用实际 checkout 和当前偏好的隔离副本重放加载检查，27 个扩展零加载错误、8 个既有 profile 与 Notes/Board 配置解析通过。不重跑已有效的同源码包级门禁。cron 包与定时入口仍不存在，任务 JSON 的原 SHA-256 保持不变。KVM Core 也已按授权升级并通过上述远程验证。临时整合 worktree、分支与探针已清理；当前运行会话仍需空闲后 reload 或重开才能采用完整的新模块。
