@@ -56,15 +56,7 @@ const ACTION_FIELDS: Record<(typeof ACTIONS)[number], ReadonlySet<string>> = {
 	attach: new Set(["action", "machine", "target", "context", "board"]),
 	detach: new Set(["action", "machine", "target", "context", "board"]),
 	read: new Set(["action", "machine", "target", "source", "lines"]),
-	reply: new Set([
-		"action",
-		"machine",
-		"target",
-		"extension",
-		"id",
-		"message",
-		"blocking",
-	]),
+	reply: new Set(["action", "machine", "target", "extension", "id", "message"]),
 };
 const AgentsRequest = obj({
 	action: {
@@ -241,10 +233,7 @@ export function isBlockingAgentsCall(input: unknown): boolean {
 				),
 				value.blocking,
 			);
-		return (
-			(value.action === "reply" || value.action === "assign") &&
-			value.blocking === true
-		);
+		return value.action === "assign" && value.blocking === true;
 	} catch {
 		return false;
 	}

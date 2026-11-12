@@ -49,7 +49,7 @@ export async function agentsHelp(
 			attach: "target context? board? machine?",
 			detach: "target context? board? machine?",
 			read: "target machine? source=latest|visible|recent? lines?",
-			reply: "target extension id message machine? blocking?",
+			reply: "target extension id message machine?",
 		},
 		rules: {
 			peers: gpt
@@ -59,8 +59,8 @@ export async function agentsHelp(
 				? "latest(default)=last reply+pending extension messages; visible=current TUI screen; recent=TUI scrollback, lines default 40. Findings→returned Notes path if shared Notes available"
 				: "latest (default) returns the last reply and pending extension messages; visible reads the current TUI screen; recent reads TUI scrollback, lines default 40. For findings, read the returned Notes path when shared Notes is available",
 			reply: gpt
-				? "Extension report/read template required; send≠resolve; default returns after semantic delivery; blocking:true waits resumed work"
-				: "Use the extension-authored template from its report/read; send does not resolve it. Returns after semantic delivery by default; blocking:true waits for resumed work",
+				? "Extension report/read template required; send≠resolve; returns after acceptance, never waits resumed work"
+				: "Use the extension-authored template from its report/read; send does not resolve it. Replies return after acceptance, without waiting for resumed work",
 			machine: gpt
 				? "machine omitted=local Pi host; list/find omitted=all machines; select current machine name or ID from list"
 				: "Omit for local (host running Pi); list/find omit for all machines. Select a current machine name or ID from list",
@@ -100,8 +100,8 @@ export async function agentsHelp(
 				? "Idle target; stop context/board independently; omitted=false, at least one true; counterpart checkpoints remain readonly"
 				: "Stop context/board independently; omitted=false, at least one true; retain counterpart checkpoints read-only; idle target",
 			blocking: gpt
-				? "spawn/assign/reply default false→dispatch then return; true→wait for result; profile overrides spawn. Parallel blocking calls: await Promise.allSettled. Background reports automatic→do other work/end turn, NO poll or await timers/extra Promises"
-				: "spawn/assign/reply return after dispatch by default. Set blocking:true to wait for the result; profile blocking overrides spawn. Use await Promise.allSettled for parallel blocking calls, including failures. Background reports arrive automatically: do other work or end this turn, never poll or await timers or extra Promises for reports",
+				? "spawn/assign default false→dispatch then return; true→wait for result; profile overrides spawn. Parallel blocking calls: await Promise.allSettled. Background reports automatic→do other work/end turn, NO poll or await timers/extra Promises"
+				: "spawn/assign return after dispatch by default. Set blocking:true to wait for the result; profile blocking overrides spawn. Use await Promise.allSettled for parallel blocking calls, including failures. Background reports arrive automatically: do other work or end this turn, never poll or await timers or extra Promises for reports",
 			share_context: gpt
 				? "Profile false→isolated notes/history; otherwise→controller sharing setting"
 				: "Profile false isolates notes/history; otherwise follows controller sharing setting",
@@ -119,7 +119,7 @@ export async function agentsHelp(
 				: "Keep each agent available until its task is verified complete; return corrections to it before closing. Use separate agents for unrelated work and independent reviews.",
 			...(profiles.has("general")
 				? {
-						general: "Independent implementation scopes",
+						general: "Only when requested/orchestrating",
 					}
 				: {}),
 		},

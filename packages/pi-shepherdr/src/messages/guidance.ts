@@ -4,7 +4,7 @@ import type { MachineStatus, ScopedMonitoredAgent } from "../types.js";
 export function orchestrationGuidance(enabled: boolean, general: boolean) {
 	const ownership = "Own a scope or delegate it; don't do both.";
 	if (!enabled)
-		return `Handle small or tightly coupled work directly. Fan out independent scopes to parallel agents unasked, preparing shared groundwork first. ${ownership}`;
+		return `Work normally. Delegate only when useful or requested. ${ownership}`;
 	const guidance = general
 		? "Orchestrate general agents with separate scopes. Integrate their results, validate the combined outcome and report it. Work directly only when asked or for routine local tasks."
 		: "Orchestrate agents with separate scopes. Integrate their results, validate the combined outcome and report it. Work directly only when asked or for routine local tasks.";

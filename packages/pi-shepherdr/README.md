@@ -83,7 +83,7 @@ Blocking calls can run in parallel. In Code or Notebook, use `await Promise.allS
 
 Nonblocking extension messages notify the controller once; blocking messages arrive with the worker's blocked result. Both remain visible in `read` and later task reports until the producer closes them. Each replyable message includes a ready `reply` call with its machine, target, extension and message ID. Fill in the extension's reply template. `send` does not resolve an extension message.
 
-`reply` returns the extension's receipt after semantic delivery, and the resumed worker's result arrives as a background report. For a blocking message, set `blocking: true` to wait for that result unless another call already owns the wait. Shepherdr forwards strings unchanged. The producing extension owns their meaning, validation and retries.
+`reply` returns the extension's receipt after semantic delivery, without waiting for resumed work. The worker's result arrives as a background report. Shepherdr forwards strings unchanged. The producing extension owns their meaning, validation and retries.
 
 Use `send` for messages and work updates without adding supervision. Use `assign` to delegate work and receive its monitored result, automatically or through an explicit blocking call. It also accepts updates to running work, sharing that work's pending result rather than replacing it. If another call is already waiting, the update returns after submission and leaves that waiter intact. Close finished workers silently instead of waking them with completion acknowledgements or shutdown notices.
 
@@ -152,7 +152,7 @@ pi.appendEntry("shepherdr-extension-message", {
 });
 ```
 
-Use a unique ID per message within the extension. `blocking` says whether the worker needs a reply before continuing; replies return after semantic delivery unless the caller explicitly sets `blocking: true`. Omit `reply` for messages requiring human handling. Close a message with another entry using the same `version`, `extension` and `id`, and `state: "closed"`. Local and remote readers follow the active session branch and expose every pending record.
+Use a unique ID per message within the extension. `blocking` says whether the worker needs a reply before continuing; replies return after semantic delivery without waiting for resumed work. Omit `reply` for messages requiring human handling. Close a message with another entry using the same `version`, `extension` and `id`, and `state: "closed"`. Local and remote readers follow the active session branch and expose every pending record.
 
 Register the reply handler on Pi's event bus:
 
@@ -237,7 +237,7 @@ On first load, Shepherdr installs three editable profiles:
 
 Profiles set starting defaults, not a permanent role. Their instructions accompany the initial assignment, so the same agent can take on different work later. Notes model roles can change its model and reasoning at context rollover without replacing the agent or discarding its saved notes.
 
-Use `general` for independent implementation scopes, requested or not. For work in the controller's repository, create and prepare a dedicated worktree, then pass it as `cwd`.
+Use `general` sparingly, mainly when requested or while orchestration is active. For work in the controller's repository, create and prepare a dedicated worktree, then pass it as `cwd`.
 
 Profiles live under:
 

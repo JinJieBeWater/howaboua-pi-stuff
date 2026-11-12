@@ -2,7 +2,6 @@ import {
 	defineTool,
 	type ExtensionAPI,
 	getMarkdownTheme,
-	type Theme,
 } from "@earendil-works/pi-coding-agent";
 import { Container, Markdown, Spacer, Text } from "@earendil-works/pi-tui";
 import { resolveNativeAgent } from "./agent-identity.js";
@@ -55,18 +54,6 @@ function requestedCall(args: unknown) {
 			"",
 		message: text("message") ?? text("handoff"),
 	};
-}
-
-function callTitle(
-	action: string,
-	identity: string,
-	theme: Theme,
-	tone: "toolTitle" | "warning" = "toolTitle",
-): string {
-	return (
-		theme.fg(tone, theme.bold(`agents ${action}`)) +
-		(identity ? theme.fg("muted", ` · ${identity}`) : "")
-	);
 }
 
 export function createAgentsTool(
@@ -319,19 +306,14 @@ export function createAgentsTool(
 			throw new Error(`unsupported action ${params.action}`);
 		},
 		renderCall(args, theme, context) {
-			// renderResult draws settled collapsed rows whole; only it has the outcome.
-			if (context?.isPartial === false && !context.isError && !context.expanded)
-				return new Container();
 			const call = requestedCall(args);
 			const title = new Text(
-				callTitle(
-					call.action,
-					call.identity,
-					theme,
+				theme.fg(
 					context && "isBlocked" in context && context.isBlocked === true
 						? "warning"
 						: "toolTitle",
-				),
+					theme.bold(`agents ${call.action}`),
+				) + (call.identity ? theme.fg("muted", ` · ${call.identity}`) : ""),
 				0,
 				0,
 			);
@@ -354,41 +336,14 @@ export function createAgentsTool(
 				typeof toolResult.details === "object" && toolResult.details !== null
 					? (toolResult.details as Record<string, unknown>)
 					: {};
-			const reported =
+			const state =
 				typeof details["status"] === "string"
 					? details["status"]
 					: details["sent"] === true
 						? "sent"
 						: details["spawned"] === true
 							? "spawned"
-							: undefined;
-			const state = reported ?? "done";
-			const tone =
-				state === "blocked"
-					? "warning"
-					: state === "working"
-						? "accent"
-						: "success";
-			if (!options.expanded && !options.isPartial && context) {
-				const call = requestedCall(context.args);
-				const name =
-					typeof details["name"] === "string" ? details["name"] : undefined;
-				const target =
-					typeof details["target"] === "string" ? details["target"] : "";
-				const count = Array.isArray(details["agents"])
-					? details["agents"].length +
-						(typeof details["moreAgents"] === "number"
-							? details["moreAgents"]
-							: 0)
-					: undefined;
-				return new Text(
-					callTitle(call.action, name ?? (call.identity || target), theme) +
-						(count === undefined ? "" : theme.fg("muted", ` · ${count}`)) +
-						(reported ? theme.fg(tone, ` · ${reported}`) : ""),
-					0,
-					0,
-				);
-			}
+							: "done";
 			const target =
 				typeof details["name"] === "string"
 					? details["name"]
@@ -396,7 +351,14 @@ export function createAgentsTool(
 						? details["target"]
 						: "";
 			const title = new Text(
-				theme.fg(tone, [target, state].filter(Boolean).join(" · ")),
+				theme.fg(
+					state === "blocked"
+						? "warning"
+						: state === "working"
+							? "accent"
+							: "success",
+					[target, state].filter(Boolean).join(" · "),
+				),
 				0,
 				0,
 			);
