@@ -3,6 +3,8 @@
 ---
 
 - Reduce startup module loading while preserving agent monitoring and shared boards.
+- Reuse each connected machine's remote helper and back off monitor reconnects up to 30 seconds.
+- Delegate independent implementation scopes automatically while handling small or tightly coupled work directly.
 - In Herdr Core, replace the per-agent status list with a one-line summary that names blocked agents and shows machines only when one is disconnected.
 - Failed `agents` calls now show their error instead of a green "done".
 - Settled `agents` calls collapse to one line, and `list` and `find` show how many agents they returned.

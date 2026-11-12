@@ -1,0 +1,55 @@
+$ bun run lint && bun run typecheck
+$ biome check .
+Checked 52 files in 44ms. No fixes applied.
+$ tsgo --noEmit
+$ bun run lint && bun run typecheck
+$ biome check .
+Checked 24 files in 37ms. No fixes applied.
+$ tsgo --noEmit
+$ bun run lint && bun run typecheck
+$ biome check .
+Checked 30 files in 24ms. No fixes applied.
+$ tsgo --noEmit
+$ bun run lint && bun run typecheck && bun run test
+$ biome check .
+Checked 25 files in 14ms. No fixes applied.
+$ tsgo --noEmit
+$ tsx --test tests/**/*.test.ts
+✔ redirects strip cross-origin credentials and recompute proxy routing (238.165ms)
+ℹ tests 1
+ℹ suites 0
+ℹ pass 1
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 912.624917
+$ bun run lint && bun run typecheck
+$ biome check .
+Checked 52 files in 23ms. No fixes applied.
+$ tsgo --noEmit
+$ bun run lint && bun run typecheck
+$ biome check .
+biome.json format ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ✖ Formatter would have printed the following content:
+
+     2  2 │     "$schema": "https://biomejs.dev/schemas/2.6.6/schema.json",
+     3  3 │     "vcs": { "enabled": true, "clientKind": "git", "useIgnoreFile": true },
+     4    │ - → "files":·{·"includes":·["**",·"!node_modules",·"!dist",·"!src/board/viewer/web"]·},
+        4 │ + → "files":·{
+        5 │ + → → "includes":·["**",·"!node_modules",·"!dist",·"!src/board/viewer/web"]
+        6 │ + → },
+     5  7 │     "formatter": { "enabled": true, "indentStyle": "tab" },
+     6  8 │     "linter": { "enabled": false },
+
+
+Checked 81 files in 25ms. No fixes applied.
+Found 1 error.
+check ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ✖ Some errors were emitted while running checks.
+
+
+error: script "lint" exited with code 1
+error: script "check" exited with code 1

@@ -7,7 +7,7 @@ import { fileURLToPath } from "node:url";
 
 const entries = {
 	"pi-shepherdr": ["index.ts"],
-	"pi-notes-compaction": ["src/index.ts", "src/context-sharing.ts"],
+	"pi-notes-compaction": ["index.ts", "src/notes/context-sharing.ts"],
 };
 const name = process.argv[2];
 if (!Object.hasOwn(entries, name)) {

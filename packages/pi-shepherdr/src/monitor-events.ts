@@ -1,5 +1,5 @@
-import { type HerdrConnection, isHerdrErrorCode } from "./herdr-client.js";
-import type { HerdrEvent, MonitoringIssue } from "./types.js";
+import type { CoreConnection } from "./core/backend.js";
+import type { MonitoringIssue } from "./types.js";
 
 interface SubscriptionAttempt {
 	key: string;
@@ -12,9 +12,9 @@ interface Subscription {
 }
 
 interface MonitorEventsOptions {
-	client: HerdrConnection;
+	client: CoreConnection;
 	reconnect?: boolean;
-	onEvent: (event: HerdrEvent) => void;
+	onChange: () => void;
 	reconcile: () => Promise<void>;
 	onWarning: (issue: MonitoringIssue) => void;
 	onRecovered: () => void;
@@ -96,11 +96,12 @@ export class MonitorEvents {
 		try {
 			if (this.resync) {
 				this.resync = false;
-				// Remap panes moved during the outage before requesting new coverage.
+				// Reconcile changes missed during the outage before restoring coverage.
 				await this.options.reconcile();
 				if (!this.active || epoch !== this.epoch) return;
 			}
-			const key = this.targetKey();
+			const targets = [...new Set(this.options.targets())].sort();
+			const key = JSON.stringify(targets);
 			if (key === "[]") {
 				this.closeSubscription();
 				this.recovered();
@@ -110,20 +111,12 @@ export class MonitorEvents {
 				const candidate = { key, controller: new AbortController() };
 				attempt = candidate;
 				this.pending = candidate;
-				const subscriptions = [
-					...this.options.targets().map((paneId) => ({
-						type: "pane.agent_status_changed",
-						pane_id: paneId,
-					})),
-					{ type: "pane.moved" },
-					{ type: "pane.closed" },
-				];
 				const unsubscribe = await this.options.client.subscribe(
-					subscriptions,
-					(event) => {
-						if (this.isLive(candidate)) this.options.onEvent(event);
+					targets,
+					() => {
+						if (this.isLive(candidate)) this.options.onChange();
 					},
-					(error) => this.disconnected(candidate, error),
+					() => this.disconnected(candidate),
 					candidate.controller.signal,
 				);
 				if (!this.isLive(candidate) || key !== this.targetKey()) {
@@ -134,7 +127,7 @@ export class MonitorEvents {
 				this.subscription = { attempt: candidate, unsubscribe };
 				this.pending = undefined;
 			}
-			// Herdr baselines status before ACK; reconcile afterward to cover setup transitions.
+			// Reconcile after subscription setup to cover transitions during handover.
 			await this.options.reconcile();
 			if (!this.active || epoch !== this.epoch) return;
 			if (key !== this.targetKey()) {
@@ -149,30 +142,8 @@ export class MonitorEvents {
 				attempt?.controller.signal.aborted
 			)
 				return;
-			let failure = error instanceof Error ? error : new Error(String(error));
-			if (attempt && isHerdrErrorCode(error, "pane_not_found")) {
-				try {
-					// A closed or moved pane can disappear before its lifecycle event arrives.
-					await this.options.reconcile();
-					if (!this.active || epoch !== this.epoch) return;
-					if (attempt.key !== this.targetKey()) {
-						this.dirty = true;
-						return;
-					}
-				} catch (reconcileError) {
-					failure =
-						reconcileError instanceof Error
-							? reconcileError
-							: new Error(String(reconcileError));
-				}
-				if (
-					!this.active ||
-					epoch !== this.epoch ||
-					attempt.controller.signal.aborted
-				)
-					return;
-			}
-			this.warn(failure.message);
+			const failure = error instanceof Error ? error : new Error(String(error));
+			this.warn();
 			if (this.options.reconnect === false) throw failure;
 			this.scheduleReconnect();
 		} finally {
@@ -201,25 +172,25 @@ export class MonitorEvents {
 		subscription?.unsubscribe();
 	}
 
-	private disconnected(attempt: SubscriptionAttempt, error?: Error): void {
+	private disconnected(attempt: SubscriptionAttempt): void {
 		if (!this.isLive(attempt)) return;
 		if (this.subscription?.attempt === attempt) this.closeSubscription();
 		if (this.pending === attempt) this.cancelPending();
-		this.warn(error?.message ?? "event stream closed");
+		this.warn();
 		this.scheduleReconnect();
 	}
 
-	private warn(detail: string): void {
+	private warn(): void {
 		const state = this.subscription ? "degraded" : "unavailable";
 		if (this.warning === state) return;
 		this.warning = state;
 		const message =
 			state === "degraded"
-				? "Herdr monitor update failed. Existing stream retained, coverage may be incomplete"
-				: "Herdr monitoring unavailable";
+				? "Some agent status updates may be delayed. Existing monitoring is still active."
+				: "Agent status updates are unavailable.";
 		this.options.onWarning({
 			state,
-			message: `${message}: ${detail}${this.options.reconnect === false ? "" : ". Retrying"}`,
+			message: `${message}${this.options.reconnect === false ? "" : " Retrying automatically."}`,
 		});
 	}
 
@@ -241,9 +212,9 @@ export class MonitorEvents {
 		const epoch = this.epoch;
 		this.reconnectTimer = setTimeout(() => {
 			this.reconnectTimer = undefined;
-			void this.retry().catch((error) => {
+			void this.retry().catch(() => {
 				if (!this.active || epoch !== this.epoch) return;
-				this.warn(error instanceof Error ? error.message : String(error));
+				this.warn();
 				this.scheduleReconnect();
 			});
 		}, this.reconnectDelay);

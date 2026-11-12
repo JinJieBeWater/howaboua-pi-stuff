@@ -1,0 +1,4 @@
+PASS: 27 configured extensions loaded, zero errors; conversion 4.0.10.
+PASS: ask/imagegen/x_search/browser/agents tools and lazy board/notes entry commands registered once; cron absent.
+PASS: 8 existing profiles and current Notes/Board preferences parse with the updated packages.
+Used copies of current preferences; no model calls, authentication, or user-data migration.

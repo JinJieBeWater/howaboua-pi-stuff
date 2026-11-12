@@ -1,15 +1,14 @@
 import { randomUUID } from "node:crypto";
 import {
-	RolledBackAgentLaunchError,
 	type StartAgentParams,
 	type StartedAgent,
 	UnstartedAgentLaunchError,
 } from "../launch-contract.js";
+import { rollbackCreatedLocation } from "../launch-location.js";
 import type { CoreConnection } from "./backend.js";
 import { piExecutable } from "./pi-executable.mjs";
 import { object } from "./protocol.js";
 import { RemoteCoreEndpoint } from "./remote-endpoint.js";
-import { remoteExec } from "./remote-exec.js";
 import { terminalPane, terminalSnapshot } from "./terminal.js";
 
 const SCREEN_READ_TIMEOUT_MS = 2_000;
@@ -19,13 +18,10 @@ export async function startCoreAgent(
 	client: CoreConnection,
 	params: StartAgentParams,
 	cwd: string,
-	_label: string,
 	args: string[],
+	signal?: AbortSignal,
 ): Promise<StartedAgent> {
-	if (params.placement === "pane")
-		throw new Error(
-			"Core cannot launch a program inside an existing terminal without terminal input. Use terminal placement for a background worker or new_tab/new_workspace for a Herdr window location.",
-		);
+	signal?.throwIfAborted();
 	const labels: Record<string, string> = {};
 	if (params.placement === "new_tab") {
 		const snapshot = terminalSnapshot(
@@ -52,20 +48,21 @@ export async function startCoreAgent(
 	}
 	const executable =
 		client.core instanceof RemoteCoreEndpoint
-			? await remoteExec(client.core.host, client.core.machine, {
+			? await client.core.call({
 					op: "pi-executable",
 					cwd,
 				})
 			: await piExecutable(cwd);
 	if (typeof executable !== "string" || !executable)
 		throw new Error("Could not resolve Pi on the target machine");
+	signal?.throwIfAborted();
 	const result = object(
 		await client.core.request("terminal.run", {
 			argv: [executable, ...args],
 			name: params.name,
 			cwd,
 			caller: process.env["HC_TERMINAL_ID"],
-			outlive_parent: true,
+			...(params.outliveParent ? { outlive_parent: true } : {}),
 			no_notify: true,
 			// Labels request adoption only by a window connected to this Core.
 			labels,
@@ -77,25 +74,22 @@ export async function startCoreAgent(
 		throw new Error(
 			"Core launch returned no local terminal address; inspect Core terminals before retrying",
 		);
-	const cleanup = { method: "terminal.close" as const, id: terminal };
+	const cleanup = { id: terminal };
 	try {
+		signal?.throwIfAborted();
 		await client.core.request("terminal.label", {
 			terminal,
 			labels: { "pi.shepherdr.name": params.name },
 		});
-		const agent = await waitReady(client, terminal);
+		const agent = await waitReady(client, terminal, signal);
+		signal?.throwIfAborted();
 		return { agent, id: terminal, cleanup };
 	} catch (error) {
-		const failure = await withStartupScreen(client, terminal, error);
-		try {
-			await client.request(cleanup.method, { id: cleanup.id });
-		} catch (cleanupError) {
-			throw new Error(
-				`${String(failure)}; cleanup failed: ${String(cleanupError)}`,
-				{ cause: failure },
-			);
-		}
-		throw new RolledBackAgentLaunchError(failure);
+		return rollbackCreatedLocation(
+			client,
+			cleanup,
+			await withStartupScreen(client, terminal, error),
+		);
 	}
 }
 
@@ -130,7 +124,11 @@ async function withStartupScreen(
 	}
 }
 
-async function waitReady(client: CoreConnection, terminal: string) {
+async function waitReady(
+	client: CoreConnection,
+	terminal: string,
+	signal?: AbortSignal,
+) {
 	const abort = new AbortController();
 	let chain = Promise.resolve();
 	let resolve!: (agent: ReturnType<typeof terminalPane>) => void;
@@ -139,6 +137,10 @@ async function waitReady(client: CoreConnection, terminal: string) {
 		resolve = yes;
 		reject = no;
 	});
+	const cancelled = () =>
+		reject(signal?.reason ?? new Error("Agent launch cancelled"));
+	signal?.addEventListener("abort", cancelled, { once: true });
+	if (signal?.aborted) cancelled();
 	const inspect = (value: unknown) => {
 		const record = object(value);
 		if (record["state"] !== "live")
@@ -205,6 +207,7 @@ async function waitReady(client: CoreConnection, terminal: string) {
 		return agent;
 	} finally {
 		clearTimeout(timer);
+		signal?.removeEventListener("abort", cancelled);
 		abort.abort();
 	}
 }

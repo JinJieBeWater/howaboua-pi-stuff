@@ -1,7 +1,9 @@
 {
-	"$schema": "https://biomejs.dev/schemas/2.6.3/schema.json",
+	"$schema": "https://biomejs.dev/schemas/2.6.6/schema.json",
 	"vcs": { "enabled": true, "clientKind": "git", "useIgnoreFile": true },
-	"files": { "includes": ["**", "!node_modules", "!dist"] },
+	"files": {
+		"includes": ["**", "!node_modules", "!dist", "!src/board/viewer/web"]
+	},
 	"formatter": { "enabled": true, "indentStyle": "tab" },
 	"linter": { "enabled": false },
 	"javascript": {

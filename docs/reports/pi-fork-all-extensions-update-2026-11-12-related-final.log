@@ -1,0 +1,20 @@
+$ bun run lint && bun run typecheck
+$ biome check .
+Checked 81 files in 44ms. No fixes applied.
+$ tsgo --noEmit
+$ bun run lint && bun run typecheck
+$ biome check .
+Checked 124 files in 42ms. No fixes applied.
+$ tsgo --noEmit
+$ bun run lint && bun run typecheck
+$ biome check .
+Checked 13 files in 5ms. No fixes applied.
+$ tsgo --noEmit
+$ bun run lint && bun run typecheck
+$ biome check .
+Checked 21 files in 10ms. No fixes applied.
+$ tsgo --noEmit
+$ bun run lint && bun run typecheck
+$ biome check .
+Checked 8 files in 4ms. No fixes applied.
+$ tsgo --noEmit

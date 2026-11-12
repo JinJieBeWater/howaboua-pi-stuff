@@ -1,0 +1,63 @@
+bun install v1.4.4 (38afee6c8)
+
+Saved bun.lock (458 packages) [79.00ms]
+$ bun install --frozen-lockfile --ignore-scripts && tsc -p scripts/tsconfig.browser-voice-start.json && bun install --frozen-lockfile --force && bun run --cwd packages/pi-browser build && bun run --cwd packages/pi-shepherdr build && bun run --cwd packages/pi-notes-compaction build
+bun install v1.4.4 (38afee6c8)
+
++ @biomejs/biome@2.6.6
++ @changesets/changelog-github@1.0.1
++ @changesets/cli@3.0.3
++ @earendil-works/pi-agent-core@1.5.2
++ @earendil-works/pi-ai@1.5.2
++ @earendil-works/pi-coding-agent@1.5.2
++ @earendil-works/pi-schema@1.5.2
++ @earendil-works/pi-tui@1.5.2
++ @types/better-sqlite3@9.6.0
++ @types/node@26.6.6
++ @typescript/native-preview@7.0.0-dev.20260707.2
++ better-sqlite3@13.0.3
++ c8@12.0.0
++ knip@6.45.0
++ node-pty@1.1.0
++ openai@7.55.0
++ oxfmt@0.78.0
++ partial-json@0.1.7
++ proxy-from-env@2.1.0
++ tsx@4.23.15
++ typescript@7.0.2
++ web-tree-sitter@0.27.2
+
+296 packages installed [6.75s]
+bun install v1.4.4 (38afee6c8)
+
++ @biomejs/biome@2.6.6
++ @changesets/changelog-github@1.0.1
++ @changesets/cli@3.0.3
++ @earendil-works/pi-agent-core@1.5.2
++ @earendil-works/pi-ai@1.5.2
++ @earendil-works/pi-coding-agent@1.5.2
++ @earendil-works/pi-schema@1.5.2
++ @earendil-works/pi-tui@1.5.2
++ @types/better-sqlite3@9.6.0
++ @types/node@26.6.6
++ @typescript/native-preview@7.0.0-dev.20260707.2
++ better-sqlite3@13.0.3
++ c8@12.0.0
++ knip@6.45.0
++ node-pty@1.1.0
++ openai@7.55.0
++ oxfmt@0.78.0
++ partial-json@0.1.7
++ proxy-from-env@2.1.0
++ tsx@4.23.15
++ typescript@7.0.2
++ web-tree-sitter@0.27.2
+
+296 packages installed [28.12s]
+$ node -e "require('node:fs').rmSync('dist', { recursive: true, force: true })" && tsc -p tsconfig.build.json && bun build remote-worker.ts --target=node --format=esm --outfile=dist/remote-worker.js --banner='// @howaboua/pi-browser managed worker'
+Bundled 37 modules in 11ms
+
+  remote-worker.js  141.29 KB  (entry point)
+
+$ bun ../../scripts/build-startup-bundle.mjs pi-shepherdr
+$ bun ../../scripts/build-startup-bundle.mjs pi-notes-compaction

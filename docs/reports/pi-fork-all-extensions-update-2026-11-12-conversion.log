@@ -1,0 +1,15 @@
+$ node ../../scripts/sync-browser-cdp.mjs --check && bun run typecheck && bun run test
+Browser CDP module copies are synchronized
+$ tsc -p tsconfig.json
+$ tsx --test tests/*.test.ts
+✔ Jupyter transport preserves signed multipart frames and rejects invalid peers (121.387834ms)
+✔ project notebook merge preserves a concurrent same-name edit (10.052833ms)
+✔ stale session recovery cannot overwrite a newer project generation (0.127584ms)
+ℹ tests 3
+ℹ suites 0
+ℹ pass 3
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 674.586084

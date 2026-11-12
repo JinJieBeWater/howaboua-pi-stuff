@@ -1,0 +1,11 @@
+$ node scripts/verify-codex-tool-binaries.mjs
+All bundled Codex tool binaries are present.
+$ node scripts/code-mode/verify-host-assets.mjs
+darwin-arm64: codex-code-mode-host-aarch64-apple-darwin.tar.gz verified
+darwin-x64: codex-code-mode-host-x86_64-apple-darwin.tar.gz verified
+linux-arm64: codex-code-mode-host-aarch64-unknown-linux-musl.tar.gz verified
+linux-x64: codex-code-mode-host-x86_64-unknown-linux-musl.tar.gz verified
+win32-arm64: codex-code-mode-host-aarch64-pc-windows-msvc.exe verified
+win32-x64: codex-code-mode-host-x86_64-pc-windows-msvc.exe verified
+All rust-v0.167.0 code-mode host assets verified.
+Verified Pi extension artifact: @howaboua/pi-codex-conversion

@@ -1,10 +1,6 @@
 import type { AgentToolUpdateCallback } from "@earendil-works/pi-coding-agent";
 import type { AgentsParams } from "./agents-contract.js";
-import {
-	dispatchAgentWork,
-	settlementResult,
-	toolResult,
-} from "./agents-work.js";
+import { dispatchAgentWork, toolResult } from "./agents-work.js";
 import type { ConnectedMachine } from "./fleet/index.js";
 import type { PaneInfo } from "./types.js";
 
@@ -40,7 +36,7 @@ export async function replyAgent(
 			result,
 		});
 	}
-	const { settlement, warning } = await dispatchAgentWork(
+	const { warning } = await dispatchAgentWork(
 		runtime,
 		panel,
 		`Reply to ${reply.extension}`,
@@ -52,11 +48,6 @@ export async function replyAgent(
 	);
 	return toolResult(
 		{
-			...(settlement
-				? settlementResult(runtime.machine, settlement, {
-						reportWorkerError: true,
-					})
-				: {}),
 			machine: runtime.machine,
 			target: panel.pane_id,
 			extension: reply.extension,
