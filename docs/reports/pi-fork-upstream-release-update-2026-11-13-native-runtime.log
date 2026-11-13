@@ -1,0 +1,1 @@
+PASS candidate bundled helpers without overrides: apply_patch writes a disposable file and returns OK; exec_bridge runs a command; view_image decodes a PNG.

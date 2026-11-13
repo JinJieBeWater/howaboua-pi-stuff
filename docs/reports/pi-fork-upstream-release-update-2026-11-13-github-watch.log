@@ -1,0 +1,4 @@
+$ bun run lint && bun run typecheck
+$ biome check .
+Checked 9 files in 9ms. No fixes applied.
+$ tsgo --noEmit

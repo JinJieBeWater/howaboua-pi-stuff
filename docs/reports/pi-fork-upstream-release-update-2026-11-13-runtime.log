@@ -1,0 +1,1 @@
+PASS built QuickJS: fresh globals; conversation store/load/delete; nested tool round-trip; four parallel cells and admission limit; terminate infinite loop; worker recovery; original version warning absent.
