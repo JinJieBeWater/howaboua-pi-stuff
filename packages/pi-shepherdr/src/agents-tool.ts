@@ -73,7 +73,7 @@ export function createAgentsTool(
 			"Delegate to persistent agents; {} lists additional action fields",
 		promptGuidelines: [
 			"agents: Read help alone first",
-			"agents: MUST use for supported agent operations, local or remote; never bypass with hc or shell commands, even after failure. Report blockers. hc remains available for non-agent processes",
+			"agents: Covers Pi agents, local or remote. Use it when it supports the operation on that target; on failure, report the specific blocker. For targets or operations outside it, use the matching hc command",
 		],
 		parameters: AgentsParameters,
 		executionMode: "parallel",
