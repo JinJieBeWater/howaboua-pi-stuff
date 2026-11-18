@@ -1,0 +1,18 @@
+<!doctype html>
+<html lang="zh-CN"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Pi 扩展更新日志 · 2026-11-18</title>
+<style>
+:root{color-scheme:dark;background:#151a1e;color:#e6ecee;font:17px/1.65 Geist,system-ui,sans-serif}body{max-width:54rem;margin:auto;padding:clamp(1rem,5vw,4rem)}h1{font-size:clamp(2rem,6vw,3.5rem);line-height:1.15;margin:.4em 0}h2{color:#9ae1ce;margin:2em 0 .3em}h3{font:600 1.05rem/1.6 'IBM Plex Mono',monospace;margin:0}article{border-top:1px solid #405057;padding:1rem 0}p{margin:.4em 0}small, time{color:#b6c5cb}a{color:#9ed2ff}strong{color:#fff}code{overflow-wrap:anywhere}footer{border-top:1px solid #405057;padding-top:1rem}</style>
+<main><time datetime="2026-11-18">2026 年 11 月 18 日</time><h1>Pi 扩展更新日志</h1>
+<p>Pi 本体已是 1.5.2。通知列出 5 个 npm 包；其中 3 个新版声明了同一个 conversion peer 下限。先看这次 fork 更新带来了什么。</p>
+<h2>本地 fork</h2><article><h3>pi-codex-conversion · 5.0.0 → 5.0.1</h3><p>新增 VM Code，变量可在同一对话复用，支持顶层 <code>await</code>、内存上限和强制取消。新增 GPT-6.2 Sol、Astra、推理设置和费用估算。TS 模式升级至 tsrs 0.25 和 TypeScript 7.1 beta。</p><p>工具图片只显示一次并遵循可见性设置，切换详情可复用预览。缓存日志能定位提示词变化而不记录正文。工具示例放宽了对调用语法的要求。</p></article>
+<article><h3>pi-agent-comms · 0.0.2 → 0.0.3</h3><p><code>new_context({resume:false})</code> 可在回复后开启新上下文并停下。Code 和 Notebook 可在同一段代码中等待笔记保存后切换上下文。短 UUID 查找失败会给出重试方法。</p><p>调整长期任务的角色预设指引、Notes／History／Board 示例，以及新建 Notes 白名单的模型。</p></article>
+<article><h3>pi-shepherdr · 1.0.1 → 1.0.2</h3><p>修复崩溃重启后 worker 启动失败、完成报告丢失，以及独立 Bun 版 Pi 启动 agent 和聚焦窗口的问题。发件人显示机器、完整地址和终端。空闲 worker 的空回合不再发送完成通知。</p><p>交接指引减少重复通知，新建通用 profile 使用 GPT-6.2 Sol。</p></article>
+<article><h3>pi-browser · 0.0.13</h3><p>版本号相同。上游 manifest 已把可选 conversion peer 下限调至 5.0.1。</p></article>
+<h2>随 conversion 对齐的 npm 包</h2>
+<article><h3>pi-ask · 0.0.19 → 0.0.20</h3><p>帮助现在明确 <code>handoff</code> 接受布尔值。</p></article>
+<article><h3>pi-codex-web-run · 0.0.10 → 0.0.11</h3><p>要求 Pi 1.5+。更新提醒改用 Pi 原生机制，遵循 <code>collapseChangelog</code>；参数定义从 TypeBox 切到 Pi 原生 schema。搜索示例不再指定 <code>await</code> 写法。</p></article>
+<article><h3>pi-codex-imagegen · 0.0.14 → 0.0.15</h3><p>生成的图片在普通和嵌套工具结果中都只显示一次。帮助不再指定 <code>await</code> 或 <code>.then()</code>。</p></article>
+<h2>可独立更新的 npm 包</h2>
+<article><h3>pi-permission-system · 42.0.0 → 42.0.2</h3><p>42.0.1 补全权限术语表和策略通道文档。42.0.2 修复权限匹配，子 agent 转发 Bash 命令时，父端会按命令的不同拼写匹配策略。</p><a href="https://github.com/gotgenes/pi-packages/compare/pi-permission-system-v42.0.0...pi-permission-system-v42.0.2">查看两个补丁的变更</a></article>
+<article><h3>pi-web-access · 0.47.0 → 0.48.0</h3><p>新增显式选择的 SpecStream、Autom 和 cloro 搜索服务。可用支持图像输入的模型回答视频问题，无需 Gemini 密钥。第一页正文抽取不全时会尝试补全，搜索服务超时会切到下一家。修复 DuckDuckGo 连续搜索易被封和首条消息前切换模型时工具加载策略未更新的问题。</p><a href="https://github.com/nicobailon/pi-web-access/blob/896d75bec55e316726db287a870eb166c4e3f40c/CHANGELOG.md">完整发布日志</a></article>
+<footer><a href="https://github.com/IgorWarzocha/howaboua-pi-stuff/compare/c3b422c6...4006488d">@howaboua 上次同步至本次目标的完整差异</a></footer></main></html>
