@@ -40,6 +40,7 @@ function readDocument(path: string): ObjectValue {
 
 /** Pi's modelOverrides layer wins over native provider catalogs. Never edit custom model definitions. */
 export function writeContextWindowOverride(
+	providerId: string,
 	modelId: string,
 	tokens: number | undefined,
 	path = contextWindowModelsPath(),
@@ -48,7 +49,7 @@ export function writeContextWindowOverride(
 		throw new Error("Enter a positive whole token count.");
 	const document = readDocument(path);
 	const providers = object(document["providers"]);
-	const provider = object(providers["openai-codex"] ?? {});
+	const provider = object(providers[providerId] ?? {});
 	const overrides = object(provider["modelOverrides"] ?? {});
 	const override = object(overrides[modelId] ?? {});
 	if (tokens === undefined) {
@@ -61,8 +62,8 @@ export function writeContextWindowOverride(
 	}
 	if (Object.keys(overrides).length > 0) provider["modelOverrides"] = overrides;
 	else delete provider["modelOverrides"];
-	if (Object.keys(provider).length > 0) providers["openai-codex"] = provider;
-	else delete providers["openai-codex"];
+	if (Object.keys(provider).length > 0) providers[providerId] = provider;
+	else delete providers[providerId];
 	mkdirSync(dirname(path), { recursive: true });
 	const temporary = `${path}.${process.pid}.context-window.tmp`;
 	try {

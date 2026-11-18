@@ -187,7 +187,7 @@ export function createSettingsConfiguration(
 						{
 							item: {
 								id: "contextWindows",
-								label: "Context windows (openai-codex)",
+								label: "Context windows",
 								currentValue: "",
 								description:
 									"Set local capacity per model in Pi models.json. Global, regardless of the Editing scope above.",

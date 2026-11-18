@@ -40,7 +40,11 @@ export function contextWindowPicker(
 	const catalog = openAICodexProviderModels();
 	const models = ctx.modelRegistry
 		.getAll()
-		.filter(({ provider }) => provider === "openai-codex")
+		.filter(
+			({ provider, id }) =>
+				provider === "openai-codex" ||
+				(provider === "magpie" && id.startsWith("codex/")),
+		)
 		.map((model) =>
 			ctx.model?.provider === model.provider && ctx.model.id === model.id
 				? ctx.model
@@ -48,32 +52,21 @@ export function contextWindowPicker(
 		);
 	const panel = new PickerPanel();
 	panel.addChild(
-		new Text(
-			theme.bold(theme.fg("accent", "Context windows (openai-codex)")),
-			2,
-			0,
-		),
-	);
-	panel.addChild(new Spacer(1));
-	panel.addChild(
-		new Text(
-			theme.fg("dim", "For proxy or renamed providers, edit Pi’s models.json."),
-			2,
-			0,
-		),
+		new Text(theme.bold(theme.fg("accent", "Context windows")), 2, 0),
 	);
 	panel.addChild(new Spacer(1));
 	const list = new SettingsList(
 		models.map((model) => ({
-			id: model.id,
-			label: model.name,
+			id: `${model.provider}/${model.id}`,
+			label: `${model.provider} · ${model.name}`,
 			currentValue: format(model.contextWindow),
-			description: model.id,
+			description: `${model.provider}/${model.id}`,
 			submenu: (_value: string, back: () => void) => {
 				panel.submenuOpen = true;
-				const defaultSize = catalog.find(
-					({ id }) => id === model.id,
-				)?.contextWindow;
+				const defaultSize =
+					model.provider === "openai-codex"
+						? catalog.find(({ id }) => id === model.id)?.contextWindow
+						: undefined;
 				const effectiveModel = () =>
 					ctx.model?.provider === model.provider && ctx.model.id === model.id
 						? ctx.model
@@ -100,7 +93,7 @@ export function contextWindowPicker(
 							throw new Error(
 								"Pi reports an invalid model configuration. Fix models.json before saving.",
 							);
-						writeContextWindowOverride(model.id, tokens);
+						writeContextWindowOverride(model.provider, model.id, tokens);
 						if (!ctx.isIdle())
 							ctx.ui.notify(
 								"Context window saved; applies when the current run settles.",
@@ -129,7 +122,10 @@ export function contextWindowPicker(
 							throw new Error(
 								"Context window saved, but could not apply to the active model. Sign in and retry.",
 							);
-						list.updateValue(model.id, format(refreshed.contextWindow));
+						list.updateValue(
+							`${model.provider}/${model.id}`,
+							format(refreshed.contextWindow),
+						);
 						updateSummary();
 						ctx.ui.notify("Context window saved and applied.", "info");
 						return true;
@@ -227,6 +223,7 @@ export function contextWindowPicker(
 		close,
 	);
 	panel.list = list;
+	if (ctx.model) list.selectItem(`${ctx.model.provider}/${ctx.model.id}`);
 	panel.addChild(list);
 	return panel;
 }

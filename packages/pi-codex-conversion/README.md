@@ -111,6 +111,8 @@ When ordinary quota runs out, eligible accounts may receive **Luna Reserve**. PC
 
 Choose under `/codex context`:
 
+Open **Context windows** to set a local window for a native Codex model or a Magpie `codex/` route. Select the provider and model, then a preset or custom token count. **Reset to default** restores that route’s configured window.
+
 | Method | What survives compaction |
 | --- | --- |
 | **Pi summary** | A readable summary. Default. |
