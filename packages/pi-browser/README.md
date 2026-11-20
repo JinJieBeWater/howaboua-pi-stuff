@@ -50,7 +50,7 @@ The browser tool is unavailable to the agent, while voice startup and `/browser`
 
 The tool discovers CDP through `CDP_PORT`, port 9222, or `DevToolsActivePort`. Set `CDP_PORT_FILE` for a non-standard port file.
 
-The `start` action runs on the selected host and can launch Chromium through a Linux systemd user session. Override the executable with `CDP_BROWSER` and the profile with `CDP_PROFILE_DIRECTORY`. On other systems, start the browser normally with remote debugging enabled.
+The `start` action runs on the selected host and can launch Chromium through a Linux systemd user session or a dedicated Google Chrome for Testing instance on macOS (also auto-launched on demand when connecting on macOS). Override the executable with `CDP_BROWSER`, the profile directory with `CDP_PROFILE_DIRECTORY`, and the macOS user data directory with `CDP_USER_DATA_DIR`. On other systems, start the browser normally with remote debugging enabled.
 
 ## Boundaries
 

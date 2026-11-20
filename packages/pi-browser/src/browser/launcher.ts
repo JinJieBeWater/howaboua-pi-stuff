@@ -1,9 +1,16 @@
 import { spawn } from "node:child_process";
+import { existsSync } from "node:fs";
+import { homedir } from "node:os";
+import { join } from "node:path";
 import { probeDebugPort, sleep } from "../cdp/discovery.js";
 
 const BROWSER_START_TIMEOUT_MS = 10_000;
 const BROWSER_UNIT = "chrome-cdp-browser.service";
 const PROCESS_OUTPUT_LIMIT = 1 * 1_024 * 1_024;
+const MACOS_DEFAULT_BROWSER =
+	"/Applications/Google Chrome for Testing.app/Contents/MacOS/Google Chrome for Testing";
+const MACOS_DEFAULT_USER_DATA_DIR = join(homedir(), ".chrome-dev-agent");
+const MACOS_DEFAULT_PROFILE_DIRECTORY = "Default";
 
 interface ProcessResult {
 	code: number;
@@ -141,6 +148,48 @@ async function waitForBrowserOrUnitRemoval(
 	return "timeout";
 }
 
+async function startMacosBrowser(
+	host: string,
+	port: string,
+	signal?: AbortSignal,
+): Promise<string> {
+	const browser = process.env["CDP_BROWSER"] ?? MACOS_DEFAULT_BROWSER;
+	if (!existsSync(browser)) {
+		throw new Error(`Browser executable not found at ${browser}`);
+	}
+	const userDataDir =
+		process.env["CDP_USER_DATA_DIR"] ?? MACOS_DEFAULT_USER_DATA_DIR;
+	const profile =
+		process.env["CDP_PROFILE_DIRECTORY"] || MACOS_DEFAULT_PROFILE_DIRECTORY;
+	const browserArgs = [
+		`--remote-debugging-address=${host}`,
+		`--remote-debugging-port=${port}`,
+		`--user-data-dir=${userDataDir}`,
+		`--profile-directory=${profile}`,
+		"--no-first-run",
+		"--no-default-browser-check",
+		"--no-startup-window",
+	];
+	const child = spawn(browser, browserArgs, {
+		detached: true,
+		stdio: "ignore",
+	});
+	child.unref();
+	let onSpawnError: ((error: Error) => void) | undefined;
+	const spawnFailure = new Promise<never>((_, reject) => {
+		onSpawnError = (error) => reject(error);
+		child.once("error", onSpawnError);
+	});
+	// Avoid unhandled rejection if waitForDebugEndpoint settles first.
+	spawnFailure.catch(() => undefined);
+	try {
+		await Promise.race([waitForDebugEndpoint(signal), spawnFailure]);
+	} finally {
+		if (onSpawnError) child.removeListener("error", onSpawnError);
+	}
+	return `Started dedicated Chrome with CDP at ${host}:${port}`;
+}
+
 export async function startBrowser(signal?: AbortSignal): Promise<string> {
 	const { port, host } = endpoint();
 	try {
@@ -149,9 +198,12 @@ export async function startBrowser(signal?: AbortSignal): Promise<string> {
 	} catch {
 		// Continue into platform launch.
 	}
+	if (process.platform === "darwin") {
+		return await startMacosBrowser(host, port, signal);
+	}
 	if (process.platform !== "linux") {
 		throw new Error(
-			"Automatic browser launch requires a Linux systemd user session. Start the authenticated browser normally with remote debugging enabled.",
+			"Automatic browser launch requires a Linux systemd user session or macOS. Start the authenticated browser normally with remote debugging enabled.",
 		);
 	}
 	const systemctl = process.env["CDP_SYSTEMCTL"] ?? "/usr/bin/systemctl";

@@ -1,3 +1,4 @@
+import { startBrowser } from "../browser/launcher.js";
 import { CdpClient } from "./client.js";
 import {
 	getDisplayPrefixLength,
@@ -245,16 +246,19 @@ export class BrowserCdpSession {
 	}
 
 	private async connectRoot(signal: AbortSignal): Promise<BrowserConnection> {
-		const client = new CdpClient();
-		const url = await getWebSocketUrl();
+		let connected: { client: CdpClient; url: string };
 		try {
-			await client.connect(url, signal);
+			connected = await this.openRootClient(signal);
+		} catch (firstError) {
+			if (process.platform !== "darwin" || this.closing || signal.aborted) {
+				throw firstError;
+			}
+			await startBrowser(signal);
 			signal.throwIfAborted();
 			if (this.closing) throw new Error("Browser session closed");
-		} catch (error) {
-			client.close();
-			throw error;
+			connected = await this.openRootClient(signal);
 		}
+		const { client, url } = connected;
 		const connection = {
 			cdp: client,
 			tabs: new BrowserTabs(client, this.ownerId, this.ownershipDirectory, url),
@@ -265,5 +269,21 @@ export class BrowserCdpSession {
 			this.root = undefined;
 		});
 		return connection;
+	}
+
+	private async openRootClient(
+		signal: AbortSignal,
+	): Promise<{ client: CdpClient; url: string }> {
+		const client = new CdpClient();
+		try {
+			const url = await getWebSocketUrl();
+			await client.connect(url, signal);
+			signal.throwIfAborted();
+			if (this.closing) throw new Error("Browser session closed");
+			return { client, url };
+		} catch (error) {
+			client.close();
+			throw error;
+		}
 	}
 }
