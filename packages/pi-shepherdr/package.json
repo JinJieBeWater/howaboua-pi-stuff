@@ -1,6 +1,6 @@
 {
   "name": "@howaboua/pi-shepherdr",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "Persistent blocking and asynchronous Pi agents through Herdr.",
   "type": "module",
   "license": "MIT",
@@ -45,7 +45,7 @@
     "format:check": "oxfmt --check '**/*.{js,cjs,mjs,jsx,ts,cts,mts,tsx,json,jsonc,json5,css}'"
   },
   "peerDependencies": {
-    "@howaboua/pi-codex-conversion": ">=5.0.1",
+    "@howaboua/pi-codex-conversion": ">=5.0.2",
     "@earendil-works/pi-ai": ">=1.1.0",
     "@earendil-works/pi-coding-agent": ">=1.5.0",
     "@earendil-works/pi-tui": ">=1.1.0"
@@ -56,11 +56,11 @@
     }
   },
   "devDependencies": {
-    "@howaboua/pi-agent-comms": "0.0.3",
-    "@howaboua/pi-codex-conversion": "5.0.1",
-    "@earendil-works/pi-ai": "1.5.2",
-    "@earendil-works/pi-coding-agent": "1.5.2",
-    "@earendil-works/pi-tui": "1.5.2",
+    "@howaboua/pi-agent-comms": "0.0.4",
+    "@howaboua/pi-codex-conversion": "5.0.2",
+    "@earendil-works/pi-ai": "1.6.0",
+    "@earendil-works/pi-coding-agent": "1.6.0",
+    "@earendil-works/pi-tui": "1.6.0",
     "@types/node": "^26.6.6",
     "typescript": "^7.0.2",
     "oxfmt": "^0.78.0"
@@ -83,6 +83,6 @@
     "access": "public"
   },
   "dependencies": {
-    "@earendil-works/pi-schema": "1.5.2"
+    "@earendil-works/pi-schema": "1.6.0"
   }
 }

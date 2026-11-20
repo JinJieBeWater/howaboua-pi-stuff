@@ -1,6 +1,6 @@
 {
   "name": "@howaboua/pi-browser",
-  "version": "0.0.13",
+  "version": "0.0.14",
   "description": "Logged-in browser inspection and control for Pi, Code Mode and Notebook Mode.",
   "type": "module",
   "license": "MIT",
@@ -46,7 +46,7 @@
     "format:check": "oxfmt --check '**/*.{js,cjs,mjs,jsx,ts,cts,mts,tsx,json,jsonc,json5,css}'"
   },
   "peerDependencies": {
-    "@howaboua/pi-codex-conversion": ">=5.0.1",
+    "@howaboua/pi-codex-conversion": ">=5.0.2",
     "@earendil-works/pi-ai": ">=1.0.0",
     "@earendil-works/pi-coding-agent": ">=1.5.0",
     "@earendil-works/pi-tui": ">=1.0.0"
@@ -57,9 +57,9 @@
     }
   },
   "devDependencies": {
-    "@howaboua/pi-codex-conversion": "5.0.1",
-    "@earendil-works/pi-ai": "1.5.2",
-    "@earendil-works/pi-coding-agent": "1.5.2",
+    "@howaboua/pi-codex-conversion": "5.0.2",
+    "@earendil-works/pi-ai": "1.6.0",
+    "@earendil-works/pi-coding-agent": "1.6.0",
     "@types/node": "^26.6.6",
     "typescript": "^7.0.2",
     "oxfmt": "^0.78.0"
@@ -91,6 +91,6 @@
     "access": "public"
   },
   "dependencies": {
-    "@earendil-works/pi-schema": "1.5.2"
+    "@earendil-works/pi-schema": "1.6.0"
   }
 }

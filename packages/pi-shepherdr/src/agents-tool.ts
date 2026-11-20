@@ -69,11 +69,10 @@ export function createAgentsTool(
 	return defineTool({
 		name: "agents",
 		label: "Shepherdr",
-		description:
-			"Delegate to persistent agents; {} lists additional action fields",
+		description: "Delegate to persistent agents; {} lists action fields",
 		promptGuidelines: [
 			"agents: Read help alone first",
-			"agents: Covers Pi agents, local or remote. Use it when it supports the operation on that target; on failure, report the specific blocker. For targets or operations outside it, use the matching hc command",
+			"agents: MUST use for supported local and remote Pi agent operations; on failure, report the specific blocker instead of bypassing via hc or shell. For targets or operations outside agents, use the matching hc command",
 		],
 		parameters: AgentsParameters,
 		executionMode: "parallel",
