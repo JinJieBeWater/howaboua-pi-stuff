@@ -6,7 +6,7 @@
     "inputsSha256": "ee9c9cd8f2e4de01626f32e6c5592ed3c02c307c1b23307c91cbce08b299b295"
   },
   "binary": {
-    "sha256": "093d5b09210b4292314dea032dc7406274740a5e366d7c6967e1ed7019ffdd09"
+    "sha256": "e633f8fb881f23b72ca9ac0a146b44df240f3009fdec194da620cfa06a6ef373"
   },
   "build": {
     "target": "x86_64-pc-windows-msvc",
